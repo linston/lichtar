@@ -1,6 +1,6 @@
 # lichtar
 
-A personal zsh configuration framework — built for Termux/Android with, and expanding to standard Linux distributions. Arch
+A personal zsh configuration framework — built for Termux/Android, and expanding to standard Linux distributions. Arch
 Linux is the first confirmed non-Android target.
 
 **Everything lives in one self-contained folder: `~/.lichtar`.** Nothing
