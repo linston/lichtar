@@ -1,0 +1,25 @@
+# Personal config — copy .env.example to .env and edit it there.
+# .env is never committed; it's where your local overrides live.
+.env
+
+# Runtime cache — regenerated automatically (zcompdump, system.env,
+# history, history_freq, fsh theme hash, completion cache)
+cache/*
+
+# Zsh plugins — git-cloned by install.sh, not tracked here.
+# load.zsh (the loader itself) is real shipped code and stays tracked.
+plugins/*/
+!plugins/load.zsh
+
+# micro editor runtime state (its shipped config/colorschemes/plugins
+# in micro/ stay tracked — this is only ephemeral session data)
+micro/buffers/
+micro/backups/
+
+# OS / editor cruft
+.DS_Store
+*.swp
+
+# dev/ tooling byproducts
+dev/__pycache__/
+*.pyc

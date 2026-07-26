@@ -1,0 +1,98 @@
+name: lint
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Syntax-check all .zsh files
+        run: |
+          status=0
+          while IFS= read -r -d '' f; do
+            if ! zsh -n "$f"; then
+              echo "::error file=$f::zsh syntax error"
+              status=1
+            fi
+          done < <(find . -name '*.zsh' -print0)
+          exit $status
+
+      - name: Syntax-check install.sh (POSIX sh)
+        run: sh -n bin/install.sh
+
+      - name: Shellcheck install.sh (advisory only, non-blocking)
+        run: |
+          command -v shellcheck >/dev/null 2>&1 || sudo apt-get install -y shellcheck
+          shellcheck -s sh bin/install.sh || true
+
+      - name: Verify every prompt badge has a visible glyph
+        run: python3 dev/check_badges.py
+
+  install-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify install.sh kept its executable bit in git
+        run: |
+          test -x "bin/install.sh" || { echo "::error::bin/install.sh lost its +x bit — README instructs running it directly"; exit 1; }
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Stage checkout at ~/.lichtar
+        # install.sh refuses to run from anywhere except exactly $HOME/.lichtar/bin/
+        # cp -a (not -r) so the executable bit survives regardless of umask
+        run: |
+          mkdir -p "$HOME/.lichtar"
+          cp -a "$GITHUB_WORKSPACE"/. "$HOME/.lichtar"/
+
+      - name: Sanity check init.zsh on a fresh clone (no plugins yet)
+        # This is exactly the scenario that broke autopair-init before —
+        # keep testing it even though install.sh below normally clones plugins.
+        run: |
+          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1)
+          echo "$out"
+          if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
+            echo "::error::init.zsh failed to load cleanly on a fresh clone"
+            exit 1
+          fi
+
+      - name: Run install.sh non-interactively
+        run: "$HOME/.lichtar/bin/install.sh" -y
+
+      - name: Verify baseline post-install state
+        run: |
+          test -x "$HOME/.lichtar/bin/lichtar" || { echo "::error::bin/lichtar not executable after install"; exit 1; }
+          grep -q "LICHTAR_HOME" "$HOME/.zshrc" || { echo "::error::~/.zshrc was not configured"; exit 1; }
+
+      - name: Run lichtar system
+        run: "$HOME/.lichtar/bin/lichtar" system --no-color
+
+      - name: Run lichtar doctor
+        # Missing optional tools are expected on a bare CI image and are not
+        # a failure — genuine runtime errors (typos, missing guards) are.
+        run: |
+          out=$("$HOME/.lichtar/bin/lichtar" doctor --no-color --no-font 2>&1)
+          echo "$out"
+          if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
+            echo "::error::lichtar doctor hit an unexpected runtime error"
+            exit 1
+          fi
+
+      - name: Sanity check init.zsh after a full install (plugins present)
+        run: |
+          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1)
+          echo "$out"
+          if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
+            echo "::error::init.zsh failed to load cleanly after install.sh"
+            exit 1
+          fi
+

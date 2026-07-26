@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+
+: "${LICHTAR_HOME:=$HOME/.lichtar}"
+if [[ ! -d "$LICHTAR_HOME" ]]; then
+    echo "[lichtar] LICHTAR_HOME not found: $LICHTAR_HOME" >&2
+    exit 1
+fi
+
+source "$LICHTAR_HOME/help/lichtar_help.zsh"
+
+case "${1:-help}" in
+    version)
+        local v
+        v=$(git -C "$LICHTAR_HOME" describe --tags --always --dirty 2>/dev/null) || v="unknown"
+        echo "lichtar $v"
+        ;;  
+    help)
+        shift
+        _lichtar_help "$@"
+        ;;
+    update)
+        shift
+        source "$LICHTAR_HOME/bin/lichtar_update.zsh"
+        _lichtar_update "$@"
+        ;;
+    doctor)
+        shift
+        source "$LICHTAR_HOME/bin/lichtar_doctor.zsh"
+        _lichtar_doctor "$@"
+        ;;
+    system)
+        shift
+        source "$LICHTAR_HOME/bin/lichtar_system.zsh"
+        _lichtar_system "$@"
+        ;;
+    changelog)
+        shift
+        source "$LICHTAR_HOME/bin/lichtar_changelog.zsh"
+        _lichtar_changelog "$@"
+        ;;
+    *)
+        echo "Usage: lichtar {version|help|update|doctor|system|changelog}"
+        ;;
+esac
