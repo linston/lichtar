@@ -66,7 +66,8 @@ jobs:
           fi
 
       - name: Run install.sh non-interactively
-        run: "$HOME/.lichtar/bin/install.sh" -y
+        run: |
+          "$HOME/.lichtar/bin/install.sh" -y
 
       - name: Verify baseline post-install state
         run: |
@@ -74,7 +75,8 @@ jobs:
           grep -q "LICHTAR_HOME" "$HOME/.zshrc" || { echo "::error::~/.zshrc was not configured"; exit 1; }
 
       - name: Run lichtar system
-        run: "$HOME/.lichtar/bin/lichtar" system --no-color
+        run: |
+          "$HOME/.lichtar/bin/lichtar" system --no-color
 
       - name: Run lichtar doctor
         # Missing optional tools are expected on a bare CI image and are not
