@@ -21,7 +21,7 @@ for arg in "$@"; do
   -y | --yes) YES=1 ;;
   -h | --help)
     cat <<EOF
-Usage: ~/.lichtar/bin/install.sh [options]
+Usage: $HOME/.lichtar/bin/install.sh [options]
 
 Options:
   -y, --yes     Don't prompt — assume yes to all package/setup steps
@@ -201,15 +201,15 @@ printf "  %s%s╚═════════════════════
 section "Pre-flight checks"
 
 if [ ! -d "$BIN_DIR" ] || [ "$LICHTAR_HOME" != "$TARGET_LICHTAR" ]; then
-  warn "install.sh must be run from inside ~/.lichtar/bin/"
+  warn "install.sh must be run from inside $HOME/.lichtar/bin/"
   warn "Found it running from: $LICHTAR_HOME"
   info "Fresh install:"
-  info "  git clone https://github.com/linston/lichtar ~/.lichtar"
-  info "  ~/.lichtar/bin/install.sh"
+  info "  git clone https://github.com/linston/lichtar $HOME/.lichtar"
+  info "  $HOME/.lichtar/bin/install.sh"
   exit 1
 fi
 
-ok "Running from ~/.lichtar — will only fill in what's missing"
+ok "Running from $HOME/.lichtar — will only fill in what's missing"
 
 # =============================================================================
 # 1. Packages
@@ -300,36 +300,36 @@ section "Directories"
 
 mkdir -p "$LICHTAR_HOME/cache"
 chmod +x "$LICHTAR_HOME/bin/lichtar" 2>/dev/null || true
-ok "Verified ~/.lichtar/cache"
+ok "Verified $HOME/.lichtar/cache"
 
 # =============================================================================
 # 4. .zshrc
 # =============================================================================
-section "Configuring ~/.zshrc"
+section "Configuring $HOME/.zshrc"
 
-LOADER='export LICHTAR_HOME="$HOME/.lichtar"
-[[ -f "$LICHTAR_HOME/init.zsh" ]] && \
-    source "$LICHTAR_HOME/init.zsh"
-'
+LOADER="export LICHTAR_HOME=\"\$HOME/.lichtar\"
+[[ -f \"\$LICHTAR_HOME/init.zsh\" ]] && \
+    source \"\$LICHTAR_HOME/init.zsh\"
+"
 
 if [ -f "$HOME/.zshrc" ] && grep -q "LICHTAR_HOME" "$HOME/.zshrc" 2>/dev/null; then
-  info "~/.zshrc already references lichtar — leaving it as-is"
+  info "$HOME/.zshrc already references lichtar — leaving it as-is"
 elif [ -f "$HOME/.zshrc" ]; then
   backup="$HOME/.zshrc.lichtar-backup-$(date +%Y%m%d%H%M%S)"
-  warn "~/.zshrc already exists and does not reference lichtar."
-  if confirm_always "Back up existing ~/.zshrc to $(basename "$backup") and replace it?"; then
+  warn "$HOME/.zshrc already exists and does not reference lichtar."
+  if confirm_always "Back up existing $HOME/.zshrc to $(basename "$backup") and replace it?"; then
     cp "$HOME/.zshrc" "$backup"
     printf '%s' "$LOADER" >"$HOME/.zshrc"
     ok "Backed up to $backup"
-    ok "Installed lichtar ~/.zshrc"
+    ok "Installed lichtar $HOME/.zshrc"
   else
     warn "Skipped — add manually:"
-    warn '  export LICHTAR_HOME="$HOME/.lichtar"'
-    warn '  source "$LICHTAR_HOME/init.zsh"'
+    warn "  export LICHTAR_HOME=\"\$HOME/.lichtar\""
+    warn "  source \"\$LICHTAR_HOME/init.zsh\""
   fi
 else
   printf '%s' "$LOADER" >"$HOME/.zshrc"
-  ok "Installed ~/.zshrc"
+  ok "Installed $HOME/.zshrc"
 fi
 
 # =============================================================================
@@ -341,7 +341,7 @@ if [ -n "$TERMUX_VERSION" ]; then
   FONT_URL="https://github.com/ryanoasis/nerd-fonts/raw/HEAD/patched-fonts/JetBrainsMono/Fonts/JetBrainsMonoNerdFont-Regular.ttf"
 
   if [ -f "$HOME/.termux/font.ttf" ]; then
-    info "~/.termux/font.ttf already exists — leaving it as-is"
+    info "$HOME/.termux/font.ttf already exists — leaving it as-is"
   elif confirm "Download and install JetBrainsMono Nerd Font?"; then
     mkdir -p "$HOME/.termux"
     if command -v curl >/dev/null 2>&1; then
