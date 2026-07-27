@@ -7,6 +7,12 @@ this file records *what* changed, tags record *which commit*.
 
 ## [Unreleased]
 
+### Fixed
+
+- `dev/preflight.sh` now syntax-checks `.zsh` files safely even if paths
+  contain whitespace, and CI/local preflight now run blocking ShellCheck
+  over every `.sh` script instead of only advisory-checking `install.sh`.
+
 ## [v0.1.0] - 2026-07-26
 
 ### Added

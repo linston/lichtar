@@ -27,10 +27,10 @@ jobs:
       - name: Syntax-check install.sh (POSIX sh)
         run: sh -n bin/install.sh
 
-      - name: Shellcheck install.sh (advisory only, non-blocking)
+      - name: Shellcheck shell scripts
         run: |
           command -v shellcheck >/dev/null 2>&1 || sudo apt-get install -y shellcheck
-          shellcheck -s sh bin/install.sh || true
+          find . -name '*.sh' -exec shellcheck -s sh {} +
 
       - name: Verify every prompt badge has a visible glyph
         run: python3 dev/check_badges.py
@@ -97,4 +97,3 @@ jobs:
             echo "::error::init.zsh failed to load cleanly after install.sh"
             exit 1
           fi
-

@@ -13,20 +13,24 @@ if ! command -v zsh >/dev/null 2>&1; then
   echo "zsh not found — can't run this check locally" >&2
   status=1
 else
-  for f in $(find . -name '*.zsh'); do
-    out=$(zsh -n "$f" 2>&1) || {
-      echo "$f: $out"
-      status=1
-    }
-  done
+  find . -name '*.zsh' -exec sh -c '
+    status=0
+    for f do
+      out=$(zsh -n "$f" 2>&1) || {
+        echo "$f: $out"
+        status=1
+      }
+    done
+    exit "$status"
+  ' sh {} + || status=1
 fi
 
 echo "== install.sh (POSIX sh) =="
 sh -n bin/install.sh || status=1
 
-echo "== shellcheck (advisory) =="
+echo "== shellcheck =="
 if command -v shellcheck >/dev/null 2>&1; then
-  shellcheck -s sh bin/install.sh || true
+  find . -name '*.sh' -exec shellcheck -s sh {} + || status=1
 else
   echo "shellcheck not installed locally — CI will still run it"
 fi
