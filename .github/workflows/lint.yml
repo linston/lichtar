@@ -8,7 +8,7 @@ jobs:
   syntax-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Install zsh
         run: sudo apt-get update && sudo apt-get install -y zsh
@@ -38,7 +38,7 @@ jobs:
   install-smoke-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Verify install.sh kept its executable bit in git
         run: |
