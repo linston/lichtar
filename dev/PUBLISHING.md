@@ -37,12 +37,16 @@ Make sure nothing personal leaked into the initial commit:
 
 ## 4. Confirm the executable bits are actually tracked correctly
 
-    git ls-files -s bin/install.sh dev/release.sh dev/preflight.sh dev/check_badges.py
+    git ls-files -s bin/install.sh dev/release.sh dev/preflight.sh
 
 Each line should start with `100755`, not `100644`. If any show `100644`:
 
     git update-index --chmod=+x bin/install.sh dev/release.sh dev/preflight.sh
     git commit -m "Fix executable bits"
+
+(`dev/check_badges.py` is deliberately excluded — it's always invoked as
+`python3 dev/check_badges.py`, never via its own shebang, so its exec bit
+doesn't matter and isn't worth tracking.)
 
 ## 5. Double check LICENSE and README
 
