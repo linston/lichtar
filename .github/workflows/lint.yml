@@ -58,7 +58,7 @@ jobs:
         # This is exactly the scenario that broke autopair-init before —
         # keep testing it even though install.sh below normally clones plugins.
         run: |
-          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1)
+          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1) || true
           echo "$out"
           if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
             echo "::error::init.zsh failed to load cleanly on a fresh clone"
@@ -82,7 +82,7 @@ jobs:
         # Missing optional tools are expected on a bare CI image and are not
         # a failure — genuine runtime errors (typos, missing guards) are.
         run: |
-          out=$("$HOME/.lichtar/bin/lichtar" doctor --no-color --no-font 2>&1)
+          out=$("$HOME/.lichtar/bin/lichtar" doctor --no-color --no-font 2>&1) || true
           echo "$out"
           if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
             echo "::error::lichtar doctor hit an unexpected runtime error"
@@ -91,7 +91,7 @@ jobs:
 
       - name: Sanity check init.zsh after a full install (plugins present)
         run: |
-          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1)
+          out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1) || true
           echo "$out"
           if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
             echo "::error::init.zsh failed to load cleanly after install.sh"
