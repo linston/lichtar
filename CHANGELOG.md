@@ -9,6 +9,8 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+## [v0.1.1] - 2026-08-15
+
 ### Added
 
 - `Alt+R` — plain, reverse-chronological history search (standard fzf
