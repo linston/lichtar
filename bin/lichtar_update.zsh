@@ -189,12 +189,15 @@ EOF
     if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
 
-        # yazi/package.toml is modified by `ya pkg upgrade`.
-        # Its runtime changes must not block the lichtar self-update;
-        # the Yazi package manager runs immediately after this section.
-        if ! git -C "$LICHTAR_HOME" diff --quiet -- yazi/package.toml 2>/dev/null; then
-            git -C "$LICHTAR_HOME" restore -- yazi/package.toml
-        fi
+        # Yazi package manager modifies tracked package state.
+        # These runtime changes must not block the lichtar self-update;
+        # `ya pkg upgrade` runs later in this update.
+        local -a YAZI_STATE_FILES=(
+            yazi/package.toml
+            yazi/flavors/catppuccin-mocha.yazi/flavor.toml
+        )
+
+        git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
 
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
