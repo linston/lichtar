@@ -713,7 +713,6 @@ _lichtar_help_render() {
         _R "5. Nerd Font"     "downloads JetBrainsMono NF on Termux; on Linux it points"
         _N "you to install one system-wide and set it in your terminal emulator"
         _R "6. Default shell" "offers to chsh -s to zsh if it isn't already"
-        _R "7. Bytecode"      "zcompile's every .zsh file to .zwc — faster shell startup"
         _BR
 
         _SS "Uninstalling"
@@ -787,7 +786,7 @@ _lichtar_help_render() {
         _X "lichtar update"
         _R "1. lichtar itself"  "git pull --ff-only, then a syntax check on every .zsh file"
         _N "Fails a syntax check → automatic rollback to the last working commit."
-        _N "Succeeds → recompiles to .zwc bytecode, and shows new CHANGELOG.md entries."
+        _N "Succeeds → shows new CHANGELOG.md entries."
         _R "2. Zsh plugins"     "git pull --ff-only in each plugins/*/ directory"
         _R "3. Yazi packages"   "ya pkg upgrade — plugins AND the Catppuccin flavor together"
         _N "Manual plugin equivalent:  for d in ~/.lichtar/plugins/*/; do git -C \"\$d\" pull --ff-only; done"

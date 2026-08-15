@@ -221,9 +221,6 @@ EOF
                     source "$LICHTAR_HOME/bin/system_detect.zsh"
                     detect_system
                     detail "System detection cache refreshed — restart your shell to apply"
-                    for _f in "$LICHTAR_HOME"/**/*.zsh(N); do
-                        zcompile "$_f" 2>/dev/null
-                    done
 
                     local changelog_new
                     changelog_new=$(git -C "$LICHTAR_HOME" diff "$before" "$after" -- CHANGELOG.md 2>/dev/null | grep '^+- ' | sed 's/^+//')
