@@ -393,17 +393,6 @@ else
 fi
 
 # =============================================================================
-# 7. Compile to bytecode
-# =============================================================================
-section "Compiling to bytecode"
-if command -v zsh >/dev/null 2>&1; then
-  LICHTAR_HOME="$LICHTAR_HOME" zsh -c 'for f in "$LICHTAR_HOME"/**/*.zsh(N); do zcompile "$f" 2>/dev/null; done' 2>/dev/null
-  ok "Compiled .zsh files to .zwc (faster shell startup)"
-else
-  skip "zsh not installed yet — skipping (will just parse normally)"
-fi
-
-# =============================================================================
 # Done
 # =============================================================================
 printf "\n  %s%s─────────────────────────────────────%s\n" "$C_INFO" "$C_B" "$C_NC"
