@@ -186,8 +186,16 @@ EOF
     # =========================================================================
     section "${LHT}${B}󰏓${NC}  Lichtar (self)"
 
-if [[ -d "$LICHTAR_HOME/.git" ]]; then
+    if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
+
+        # yazi/package.toml is modified by `ya pkg upgrade`.
+        # Its runtime changes must not block the lichtar self-update;
+        # the Yazi package manager runs immediately after this section.
+        if ! git -C "$LICHTAR_HOME" diff --quiet -- yazi/package.toml 2>/dev/null; then
+            git -C "$LICHTAR_HOME" restore -- yazi/package.toml
+        fi
+
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
             after=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)

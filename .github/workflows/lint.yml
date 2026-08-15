@@ -71,8 +71,23 @@ jobs:
 
       - name: Verify baseline post-install state
         run: |
-          test -x "$HOME/.lichtar/bin/lichtar" || { echo "::error::bin/lichtar not executable after install"; exit 1; }
-          grep -q "LICHTAR_HOME" "$HOME/.zshrc" || { echo "::error::~/.zshrc was not configured"; exit 1; }
+          test -x "$HOME/.lichtar/bin/lichtar" || {
+            echo "::error::bin/lichtar not executable after install"
+            exit 1
+          }
+
+          grep -q "LICHTAR_HOME" "$HOME/.zshrc" || {
+            echo "::error::~/.zshrc was not configured"
+            exit 1
+          }
+
+          zwc_count=$(find "$HOME/.lichtar" -type f -name '*.zwc' | wc -l)
+          test "$zwc_count" -gt 0 || {
+            echo "::error::install.sh did not generate any .zwc bytecode files"
+            exit 1
+          }
+
+          echo "Verified $zwc_count generated .zwc bytecode file(s)"
 
       - name: Run lichtar system
         run: |
