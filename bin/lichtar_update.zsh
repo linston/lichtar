@@ -195,9 +195,33 @@ if [[ -d "$LICHTAR_HOME/.git" ]]; then
                 skip "Already up to date"
             else
                 ok "Updated: ${before} → ${after}"
-                source "$LICHTAR_HOME/bin/system_detect.zsh"
-                detect_system
-                detail "System detection cache refreshed — restart your shell to apply"
+
+                # Verify the new code actually loads before committing to
+                # it — a broken commit here would leave every future shell
+                # start unable to open at all, with no easy way back in.
+                local _syntax_bad=0 _f
+                for _f in $(find "$LICHTAR_HOME" -name '*.zsh' -not -path "*/plugins/*/*"); do
+                    zsh -n "$_f" 2>/dev/null || _syntax_bad=1
+                done
+
+                if (( _syntax_bad )); then
+                    warn "New version failed a syntax check — rolling back to ${before}"
+                    git -C "$LICHTAR_HOME" reset --hard "$before" >/dev/null 2>&1
+                    detail "Reverted — your shell is safe. Try again later or report upstream."
+                    FAILED+=("lichtar (self) — broken update, rolled back")
+                else
+                    source "$LICHTAR_HOME/bin/system_detect.zsh"
+                    detect_system
+                    detail "System detection cache refreshed — restart your shell to apply"
+                    for _f in "$LICHTAR_HOME"/**/*.zsh(N); do
+                        zcompile "$_f" 2>/dev/null
+                    done
+
+                    local changelog_new
+                    changelog_new=$(git -C "$LICHTAR_HOME" diff "$before" "$after" -- CHANGELOG.md 2>/dev/null | grep '^+- ' | sed 's/^+//')
+                    [[ -n "$changelog_new" ]] && print_limited_list "What's new:" "$changelog_new"
+                fi
+                unset _syntax_bad _f
             fi
         else
             warn "lichtar self-update failed (local changes or diverged history?)"

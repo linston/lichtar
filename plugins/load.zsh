@@ -21,15 +21,17 @@ _load_plugin zsh-autosuggestions              zsh-autosuggestions.zsh
 _load_plugin zsh-history-substring-search     zsh-history-substring-search.zsh
 _load_plugin fzf-tab                          fzf-tab.plugin.zsh
 _load_plugin fast-syntax-highlighting         fast-syntax-highlighting.plugin.zsh
+# zsh-autopair calls autopair-init itself at the end of the plugin file —
+# calling it again here was a needless duplicate init on every startup.
 _load_plugin zsh-autopair                     autopair.zsh
-(( $+functions[autopair-init] )) && autopair-init
 
 # ── Apply fsh theme (must run AFTER the plugin above is loaded) ──────────────
 if [[ -n "$CL_FSH_THEME_INI" && -f "$CL_FSH_THEME_INI" ]]; then
     local _fsh_hash_file="$LICHTAR_HOME/cache/fsh_theme.md5"
     local _fsh_plugin_dir="$LICHTAR_HOME/plugins/fast-syntax-highlighting"
+    zmodload zsh/stat 2>/dev/null
     local _fsh_plugin_mtime
-    _fsh_plugin_mtime=$(stat -c %Y "$_fsh_plugin_dir" 2>/dev/null || stat -f %m "$_fsh_plugin_dir" 2>/dev/null)
+    _fsh_plugin_mtime=$(zstat +mtime "$_fsh_plugin_dir" 2>/dev/null)
     # Fingerprint = ini file hash + plugin dir mtime, so a fresh git clone
     # (new device, reinstall) forces a re-apply even if the .ini is unchanged
     local _fsh_hash_now="$(md5sum "$CL_FSH_THEME_INI" 2>/dev/null | cut -d' ' -f1)-${_fsh_plugin_mtime}"

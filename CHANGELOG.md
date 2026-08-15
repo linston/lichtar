@@ -3,15 +3,71 @@
 All notable changes to lichtar are documented here.
 Format loosely follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions correspond to git tags (`lichtar version` reads them directly) —
-this file records *what* changed, tags record *which commit*.
+this file records _what_ changed, tags record _which commit_.
+
+---
 
 ## [Unreleased]
 
+### Added
+
+- `Alt+R` — plain, reverse-chronological history search (standard fzf
+  behavior, no frequency ranking), alongside the existing `Ctrl+R`
+  frequency-ranked search. Not bound to `Ctrl+Shift+R`: that combo isn't
+  reliably distinguishable from plain `Ctrl+R` across terminals, and
+  Termux's own support for the escape sequences that would disambiguate
+  it is undocumented. Alt+R works identically everywhere.
+- `lichtar update` now shows what's new in `CHANGELOG.md` right after a
+  successful self-update, instead of requiring a separate
+  `lichtar changelog` to notice.
+- `glow` — new required dependency. Markdown files now render properly
+  (headings, bold, lists, code blocks) instead of as plain text.
+- `md` function — view any markdown file through `glow`, themed to
+  match lichtar's Catppuccin Mocha (falls back to `$PAGER`/`less` if
+  `glow` isn't installed).
+- `lichtar changelog` now renders through `glow` + the same theme
+  instead of plain-text `less`.
+- Vendored Catppuccin's official Glamour style
+  (`themes/glow/catppuccin-mocha.json`, MIT, from catppuccin/glamour).
+
 ### Fixed
 
+- `lichtar help` was out of sync with several already-shipped features:
+  `lichtar changelog`/`lichtar version` weren't listed as commands,
+  `lichtar update`'s description still said "plugins only" (missing
+  self-update/zcompile/changelog-preview), `md`, the ssh-agent pidfile
+  reuse, `Alt+R`, install.sh's bytecode-compile step, and `micro` as an
+  optional tool were all undocumented.
+- `.zsh` files are now compiled to `.zwc` bytecode (`zcompile`) at the
+  end of `install.sh` and after every successful self-update — cuts
+  parse time on shell start, ~2.4x faster `source` measured on the
+  largest file. Stale `.zwc` (source changed since last compile) is
+  automatically ignored by zsh, so this is purely additive, no risk of
+  running outdated code.
+- `lichtar update` now runs a syntax check (`zsh -n`) on lichtar's own
+  files after a self-update, and automatically rolls back to the
+  previous commit if anything fails to parse — a bad `git pull` used to
+  mean the next shell couldn't even open.
+- `autopair-init` was being called twice on every shell start — once by
+  `zsh-autopair` itself (its own plugin file self-inits on source), once
+  again explicitly in `plugins/load.zsh`. Removed the redundant second
+  call.
+- `ssh-agent` is now reused across terminal sessions via a pidfile
+  (`cache/ssh-agent.env`) instead of spawning a new agent process on
+  every shell start — previously every new terminal leaked one.
+- `fast-theme` (fast-syntax-highlighting) was re-applying itself on
+  every single shell start instead of only when the theme actually
+  changed. Its cache fingerprint depended on `stat -c %Y` / `stat -f %m`
+  — neither of which exist on Termux's `stat` — so the mtime component
+  was always empty and the fingerprint never matched. Replaced with
+  zsh's builtin `zstat` (already used the same way elsewhere in the
+  codebase), which doesn't depend on any external `stat` binary's flag
+  dialect.
 - `dev/preflight.sh` now syntax-checks `.zsh` files safely even if paths
   contain whitespace, and CI/local preflight now run blocking ShellCheck
   over every `.sh` script instead of only advisory-checking `install.sh`.
+
+---
 
 ## [v0.1.0] - 2026-07-26
 

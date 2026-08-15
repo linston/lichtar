@@ -11,8 +11,13 @@ _lichtar_changelog() {
         return 1
     fi
 
-    less -R \
-        --prompt="  lichtar changelog — / search  n/N next/prev  q quit " \
-        -j4 \
-        "$LICHTAR_HOME/CHANGELOG.md"
+    if command -v glow &>/dev/null; then
+        source "$LICHTAR_HOME/core/functions.zsh"
+        md "$LICHTAR_HOME/CHANGELOG.md"
+    else
+        less -R \
+            --prompt="  lichtar changelog — / search  n/N next/prev  q quit " \
+            -j4 \
+            "$LICHTAR_HOME/CHANGELOG.md"
+    fi
 }

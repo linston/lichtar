@@ -27,3 +27,12 @@ zrc() {
     add-zsh-hook -d preexec _timer_preexec
     "$EDITOR" ~/.zshrc && source ~/.zshrc
 }
+
+md() {
+    local file="${1:-README.md}"
+    if command -v glow &>/dev/null; then
+        glow -p "$file"
+    else
+        ${PAGER:-less} "$file"
+    fi
+}

@@ -107,6 +107,9 @@ export CL_SUG="#585b70"   # suggestion text color (Overlay0 — subtle, not dist
 # happen AFTER the plugin is loaded (see plugins/load.zsh)
 export CL_FSH_THEME_INI="$LICHTAR_HOME/themes/fast-syntax-highlighting/catppuccin-mocha.ini"
 
+# Applied by `md()` / `lichtar changelog` — glow reads this automatically
+export GLOW_STYLE="$LICHTAR_HOME/themes/glow/catppuccin-mocha.json"
+
 # ── Man pages (ANSI SGR codes, not hex) ───────────────────────────────────────
 CL_MAN_HDR="38;5;189"  # bold headings
 CL_MAN_USR="38;5;116"  # underlined arguments

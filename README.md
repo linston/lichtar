@@ -58,7 +58,7 @@ installer checks what's missing and prints the right command for your
 package manager, but never installs anything or calls `sudo` for you.
 
 **Required:** `zsh` `git` `curl` `yazi` `fzf` `zoxide` `eza` `fd` `bat`
-`unzip` `p7zip` `less`
+`unzip` `p7zip` `less` `glow`
 
 **Optional:** `micro` `neovim` `unrar` `zstd` `ptpython` `openssh`
 

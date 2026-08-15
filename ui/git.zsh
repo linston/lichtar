@@ -4,8 +4,8 @@ autoload -Uz vcs_info
 zstyle ':vcs_info:*' enable git
 zstyle ':vcs_info:*' check-for-changes true
 zstyle ':vcs_info:git:*' formats " %F{$CL_GIF} %F{$CL_GBR}%b%u%c%f"
-zstyle ':vcs_info:git:*' unstagedstr "%F{$CL_GUC}●%f"
-zstyle ':vcs_info:git:*' stagedstr "%F{$CL_GSC}●%f"
+zstyle ':vcs_info:git:*' unstagedstr "%F{$CL_GUC} ●%f"
+zstyle ':vcs_info:git:*' stagedstr "%F{$CL_GSC} ●%f"
 
 function _git_status_optimized() {
     _git_ahead_behind=""

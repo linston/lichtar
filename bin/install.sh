@@ -220,7 +220,7 @@ PM=$(detect_pkg_manager) || PM=""
 SUDO_PREFIX=""
 [ -n "$PM" ] && [ "$PM" != "pkg" ] && [ "$(id -u)" -ne 0 ] && SUDO_PREFIX="sudo "
 
-REQUIRED_PKGS="zsh git curl yazi fzf zoxide eza fd bat unzip less"
+REQUIRED_PKGS="zsh git curl yazi fzf zoxide eza fd bat unzip less glow"
 OPTIONAL_PKGS="neovim unrar zstd ptpython"
 
 missing_required=""
@@ -390,6 +390,17 @@ else
   else
     info "Skipped — switch manually later: chsh -s $ZSH_PATH"
   fi
+fi
+
+# =============================================================================
+# 7. Compile to bytecode
+# =============================================================================
+section "Compiling to bytecode"
+if command -v zsh >/dev/null 2>&1; then
+  zsh -c 'for f in "$LICHTAR_HOME"/**/*.zsh(N); do zcompile "$f" 2>/dev/null; done' 2>/dev/null
+  ok "Compiled .zsh files to .zwc (faster shell startup)"
+else
+  skip "zsh not installed yet — skipping (will just parse normally)"
 fi
 
 # =============================================================================

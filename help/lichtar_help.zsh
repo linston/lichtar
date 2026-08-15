@@ -153,10 +153,11 @@ _lichtar_help_render() {
         _X "micro Ctrl+T → select config.py → line becomes: micro ./src/config.py"
         _BR
 
-        _SS "History Search — Ctrl+R"
+        _SS "History Search — Ctrl+R / Alt+R"
         _B "Searches past commands, ranked by how often you use them"
         _B "(ties broken by most-recent-use). Not just chronological."
         _R "Ctrl+R"        "open frequency-ranked history search"
+        _R "Alt+R"         "open plain history search — newest first, no ranking"
         _R "Type fragment" "filter by any part of the command"
         _R "Enter"         "re-run selected command"
         _X "Ctrl+R → type 'pip install' → your most-used pip install line, first"
@@ -359,6 +360,12 @@ _lichtar_help_render() {
         _X "v ~/.zshrc"
         _BR
 
+        _SS "Markdown"
+        _R "md [file]" "render markdown via glow, themed to match  (default: README.md)"
+        _X "md CHANGELOG.md"
+        _N "No glow installed → falls back to \$PAGER/less, plain text."
+        _BR
+
         _SS "Archive extraction  (extract — universal unpacker)"
         _B "Detects archive format automatically — no need to remember flags."
         _BR
@@ -422,6 +429,12 @@ _lichtar_help_render() {
         _N "Type any fragment — matches anywhere in the command."
         _X "Ctrl+R → type 'install flask' → your most-used matching line, first"
         _BR
+
+        _SS "Search — plain, reverse-chronological (Alt+R)"
+        _R "Alt+R" "standard history search, newest first, no ranking"
+        _N "Same as the usual fzf Ctrl+R most people are used to elsewhere."
+        _BR
+
         _R "↑ arrow" "go back through commands matching current prefix"
         _R "↓ arrow" "go forward through matches"
         _X "Type: git  then press ↑  →  cycles only through git commands"
@@ -642,8 +655,10 @@ _lichtar_help_render() {
     ssh)
         _H
         _S "SSH Agent"
-        _B "An SSH agent starts automatically when the shell starts,"
-        _B "if no agent is already running."
+        _B "An SSH agent starts automatically when the shell starts — and is reused"
+        _B "across terminals via a pidfile, not respawned per shell. A dead PID or"
+        _B "missing socket (agent killed, device rebooted) is detected automatically"
+        _B "and a fresh agent starts in its place."
         _BR
 
         _SS "Typical workflow"
@@ -698,6 +713,7 @@ _lichtar_help_render() {
         _R "5. Nerd Font"     "downloads JetBrainsMono NF on Termux; on Linux it points"
         _N "you to install one system-wide and set it in your terminal emulator"
         _R "6. Default shell" "offers to chsh -s to zsh if it isn't already"
+        _R "7. Bytecode"      "zcompile's every .zsh file to .zwc — faster shell startup"
         _BR
 
         _SS "Uninstalling"
@@ -722,9 +738,11 @@ _lichtar_help_render() {
         _R "p7zip"   "extract — .7z  (provides the 7z/7za binary)"
         _R "yazi"    "TUI file manager  (y command)"
         _R "less"    "pager used by lichtar help"
+        _R "glow"    "markdown renderer — 'md' function, lichtar changelog"
         _BR
 
         _SS "Optional tools"
+        _R "micro"    "default \$LICHTAR_EDITOR — see: .env.example"
         _R "unrar"    "extract — .rar"
         _R "zstd"     "extract — .zst / .tar.zst"
         _R "neovim"  "'v' alias always opens this — independent of \$EDITOR"
@@ -757,15 +775,22 @@ _lichtar_help_render() {
 
         _SS "lichtar CLI commands"
         _R "lichtar doctor"          "full environment check — deps, versions, font, suggests fixes"
-        _R "lichtar update"          "pulls latest changes for all installed plugins"
+        _R "lichtar update"          "self-update + plugins + yazi packages, see below"
         _R "lichtar system"          "shows cached platform/distro/package-manager/icon info"
         _R "lichtar system --force"  "re-runs detection and overwrites the cache"
+        _R "lichtar changelog"       "what changed, rendered via glow (falls back to less)"
+        _R "lichtar version"         "current version — git tag/commit, via git describe"
         _R "lichtar help <topic>"    "this help system"
         _BR
 
-        _SS "Updating plugins"
+        _SS "Updating"
         _X "lichtar update"
-        _N "Manual equivalent:  for d in ~/.lichtar/plugins/*/; do git -C \"\$d\" pull --ff-only; done"
+        _R "1. lichtar itself"  "git pull --ff-only, then a syntax check on every .zsh file"
+        _N "Fails a syntax check → automatic rollback to the last working commit."
+        _N "Succeeds → recompiles to .zwc bytecode, and shows new CHANGELOG.md entries."
+        _R "2. Zsh plugins"     "git pull --ff-only in each plugins/*/ directory"
+        _R "3. Yazi packages"   "ya pkg upgrade — plugins AND the Catppuccin flavor together"
+        _N "Manual plugin equivalent:  for d in ~/.lichtar/plugins/*/; do git -C \"\$d\" pull --ff-only; done"
         _BR
 
         _SS "Clearing caches"
@@ -804,6 +829,10 @@ _lichtar_help_render() {
         _W "Termux has no standard 'locale' — [:ascii:] class unsupported in regex."
         _N "Non-ASCII detection uses LC_ALL=C + tr instead of =~ [:ascii:]."
         _W "Android memory killer may terminate background processes (ssh-agent)."
+        _N "ssh-agent is reused via a pidfile across terminals — if Android killed it,"
+        _N "the next new shell detects the dead PID/socket and starts a fresh one"
+        _N "automatically. You still need ssh-add again after that (loaded keys don't"
+        _N "survive an agent restart)."
         _N "Use Termux:Boot app to persist services across reboots."
         ;;
 
@@ -819,7 +848,8 @@ _lichtar_help_render() {
         _R "Ctrl+F"     "fzf fuzzy cd — browse subdirectories"
         _R "Ctrl+G"     "zoxide jump — frecency-based smart cd"
         _R "Ctrl+T"     "fzf file picker — insert path into command"
-        _R "Ctrl+R"     "fzf history search"
+        _R "Ctrl+R"     "fzf history search  (frequency-ranked)"
+        _R "Alt+R"      "fzf history search  (plain, reverse-chronological)"
         _R "Ctrl+L"     "clear screen  (scrollback preserved)"
         _R "<dirname>"  "AUTO_CD — enter directory without 'cd'"
         _R "up [N]"     "go up N levels  (default 1)"
@@ -829,6 +859,7 @@ _lichtar_help_render() {
         _SS "Files & Archives"
         _R "ls / ll / la / lt" "eza listings  (long / all / tree)"
         _R "v <file>"          "open in Neovim"
+        _R "md [file]"         "render markdown via glow  (default: README.md)"
         _R "extract <file>"    "universal unpacker — gz bz2 xz zst zip 7z rar"
 
         _SS "Tab Completion"
@@ -850,7 +881,8 @@ _lichtar_help_render() {
         _R "py" "python3  (or ptpython if available)"
 
         _SS "History"
-        _R "Ctrl+R"         "fzf search"
+        _R "Ctrl+R"         "fzf search  (frequency-ranked)"
+        _R "Alt+R"          "fzf search  (plain, reverse-chronological)"
         _R "Space prefix"   "command excluded from history"
         _R "Non-ASCII guard" "warns on wrong keyboard layout  (Enter twice to force)"
 
@@ -858,8 +890,9 @@ _lichtar_help_render() {
         _R "zrc"                  "edit + safe reload ~/.zshrc"
         _R "exec zsh"             "full restart — clears all caches"
         _R "lichtar doctor"       "environment check — deps, versions, font"
-        _R "lichtar update"       "pull latest changes for all plugins"
+        _R "lichtar update"       "self-update + plugins + yazi packages"
         _R "lichtar system"       "show platform/distro/package-manager info"
+        _R "lichtar changelog"    "what changed, rendered via glow"
         _R "lichtar help <topic>" "detailed help"
         _R "lichtar help list"    "all available topics"
 

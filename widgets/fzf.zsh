@@ -82,6 +82,23 @@ zle -N __fzf_history_widget
 bindkey '^R' __fzf_history_widget
 
 # ==========================================
+# ALT+R: history search, standard reverse-chronological (no frequency ranking)
+# ==========================================
+__fzf_history_plain_widget() {
+    local selected
+    selected=$(fc -rl 1 | sed -E 's/^[[:space:]]*[0-9]+[[:space:]]*//' | \
+        fzf --height 45% --reverse --border --prompt='History (recent): ' \
+            --query="$BUFFER")
+    if [[ -n "$selected" ]]; then
+        BUFFER="$selected"
+        CURSOR=${#BUFFER}
+    fi
+    _force_refresh_ui
+}
+zle -N __fzf_history_plain_widget
+bindkey '^[r' __fzf_history_plain_widget
+
+# ==========================================
 # CTRL+T: file picker (custom, consistent border)
 # ==========================================
 __fzf_file_widget() {

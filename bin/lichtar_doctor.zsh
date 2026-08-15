@@ -161,7 +161,7 @@ EOF
     # =========================================================================
     section "${S1}${B}${NC}  Dependencies"
 
-    local -a REQUIRED=(zsh git curl fzf zoxide eza fd bat yazi unzip less)
+    local -a REQUIRED=(zsh git curl fzf zoxide eza fd bat yazi unzip less glow)
     local -a OPTIONAL=(neovim unrar zstd ptpython micro)
     local dep
 
