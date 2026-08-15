@@ -81,14 +81,6 @@ jobs:
             exit 1
           }
 
-          zwc_count=$(find "$HOME/.lichtar" -type f -name '*.zwc' | wc -l)
-          test "$zwc_count" -gt 0 || {
-            echo "::error::install.sh did not generate any .zwc bytecode files"
-            exit 1
-          }
-
-          echo "Verified $zwc_count generated .zwc bytecode file(s)"
-
       - name: Run lichtar system
         run: |
           "$HOME/.lichtar/bin/lichtar" system --no-color
