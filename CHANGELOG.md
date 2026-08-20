@@ -9,6 +9,10 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+### Fixed
+
+- `ui/prompt` Added transient `RPROMPT` (`zle-line-finish`) to eliminate ghost clock artifacts and prompt drifting during terminal resize.
+
 ## [v0.1.1] - 2026-08-15
 
 ### Added

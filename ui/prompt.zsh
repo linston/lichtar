@@ -78,7 +78,15 @@ function _assemble_prompt() {
 # ==========================================
 # 3. INTERFACE AND HOOKS
 # ==========================================
-setopt PROMPT_SUBST
+# Clear right prompt (clock) before executing commands and on resize reflow
+setopt no_prompt_cr
+setopt prompt_subst
+
+# Transient prompt: automatically erases RPROMPT so it never stays in scrollback
+zle-line-finish() {
+  RPROMPT=""
+  zle reset-prompt
+}
+zle -N zle-line-finish
 
 RPROMPT='${_cmd_duration}%F{$CL_TIM} %D{%H:%M}%f'
-
