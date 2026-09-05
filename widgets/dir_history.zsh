@@ -3,6 +3,11 @@
 # Alt+Left / Alt+Right — browser-style back/forward directory navigation
 # =============================================================================
 
+# ── Interactive-only widget ───────────────────────────────────────────────────
+[[ -o interactive ]] || return 0
+
+autoload -Uz add-zsh-hook
+
 typeset -ga _dir_hist=("$PWD")
 typeset -gi _dir_hist_pos=1
 typeset -gi _dir_nav_flag=0
