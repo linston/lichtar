@@ -17,63 +17,82 @@ detect_system() {
         distro="${ID:-unknown}"
         family="${ID_LIKE:-}"
 
+        # Package manager: shared with install.sh via bin/data/distro-pkgmanager.txt
+        # (see that file's header for why this can't just be a sourced .zsh file).
+        pm=""
+        local _pmdata="$LICHTAR_HOME/bin/data/distro-pkgmanager.txt"
+        local _pmline _pmpattern
+        if [[ -r "$_pmdata" ]]; then
+            while IFS= read -r _pmline; do
+                [[ -z "$_pmline" || "$_pmline" == \#* || "$_pmline" == LIKE:* ]] && continue
+                _pmpattern="${_pmline%:*}"
+                if [[ "$distro" == ${~_pmpattern} ]]; then
+                    pm="${_pmline##*:}"
+                    break
+                fi
+            done < "$_pmdata"
+            if [[ -z "$pm" ]]; then
+                while IFS= read -r _pmline; do
+                    [[ "$_pmline" == LIKE:* ]] || continue
+                    _pmline="${_pmline#LIKE:}"
+                    _pmpattern="${_pmline%:*}"
+                    if [[ "$family" == ${~_pmpattern} ]]; then
+                        pm="${_pmline##*:}"
+                        break
+                    fi
+                done < "$_pmdata"
+            fi
+        fi
+
+        # Icon/color: purely zsh/UI-side data, never duplicated in install.sh,
+        # so it stays a plain case statement rather than living in the shared file.
         case "$distro" in
             arch|archarm)
-                pm="pacman"
                 icon=""
                 color="ARCH"
                 ;;
 
             endeavouros)
-                pm="pacman"
                 icon=""
                 color="ENDEAVOUR"
                 ;;
 
             manjaro|manjaro-arm)
-                pm="pacman"
                 icon=""
                 color="MANJARO"
                 ;;
 
             ubuntu)
-                pm="apt"
                 icon=""
                 color="UBUNTU"
                 ;;
 
             debian)
-                pm="apt"
                 icon=""
                 color="DEBIAN"
                 ;;
 
             fedora)
-                pm="dnf"
                 icon=""
                 color="FEDORA"
                 ;;
 
-            opensuse*|opensuse-leap|opensuse-tumbleweed)
-                pm="zypper"
+            opensuse*)
                 icon=""
                 color="OPENSUSE"
                 ;;
 
             alpine)
-                pm="apk"
                 icon=""
                 color="ALPINE"
                 ;;
 
             nixos)
-                pm="nix"
                 icon=""
                 color="NIXOS"
                 ;;
 
             void)
-                pm="xbps"
                 icon=""
                 color="VOID"
                 ;;
@@ -82,41 +101,34 @@ detect_system() {
                 # Unknown/derivative ID not matched above (e.g. spins,
                 # rebrands, future ARM variants) — fall back to the
                 # closest known family via ID_LIKE before giving up.
-                
                 case "$family" in
                     *arch*)
-                        pm="pacman"
-                        icon=""
+                        icon=""
                         color="ARCH"
                         ;;
 
                     *debian*)
-                        pm="apt"
-                        icon=""
+                        icon=""
                         color="DEBIAN"
                         ;;
-                    
+
                     *ubuntu*)
-                        pm="apt"
-                        icon=""
+                        icon=""
                         color="UBUNTU"
                         ;;
 
                     *fedora*|*rhel*)
-                        pm="dnf"
-                        icon=""
+                        icon=""
                         color="FEDORA"
                         ;;
 
                     *suse*)
-                        pm="zypper"
-                        icon=""
+                        icon=""
                         color="OPENSUSE"
                         ;;
 
                     *)
-                        pm=""
-                        icon=""
+                        icon=""
                         color="LINUX"
                         ;;
                 esac

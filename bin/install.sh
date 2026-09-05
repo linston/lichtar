@@ -85,62 +85,52 @@ confirm_always() {
 # missing and prints the correct copy-pasteable command for the
 # person's own distro. No sudo/privilege handling needed here at all.
 detect_pkg_manager() {
-  # This intentionally duplicates a slice of the ID/ID_LIKE mapping in
-  # bin/system_detect.zsh. It can't source that file: it's zsh syntax,
-  # and install.sh must run under a plain POSIX /bin/sh — sometimes
+  # Reads bin/data/distro-pkgmanager.txt — single source of truth shared
+  # with bin/system_detect.zsh. Can't just source that file directly: it's
+  # zsh syntax, and this must run under plain POSIX /bin/sh, sometimes
   # before zsh itself is installed.
   if [ -n "$TERMUX_VERSION" ]; then
     echo "pkg"
     return 0
   fi
-  if [ -r /etc/os-release ]; then
-    id_val=$(sed -n 's/^ID=//p' /etc/os-release | tr -d '"')
-    like_val=$(sed -n 's/^ID_LIKE=//p' /etc/os-release | tr -d '"')
+  [ -r /etc/os-release ] || return 1
+  id_val=$(sed -n 's/^ID=//p' /etc/os-release | tr -d '"')
+  like_val=$(sed -n 's/^ID_LIKE=//p' /etc/os-release | tr -d '"')
+  data="$LICHTAR_HOME/bin/data/distro-pkgmanager.txt"
+  [ -r "$data" ] || return 1
+
+  while IFS= read -r line; do
+    case "$line" in
+    '' | '#'* | 'LIKE:'*) continue ;;
+    esac
+    pattern="${line%:*}"
+    pm="${line##*:}"
+    # shellcheck disable=SC2254 # intentional: $pattern must glob-match (e.g. "opensuse*"), not match literally
     case "$id_val" in
-    arch | archarm | endeavouros | manjaro | manjaro-arm)
-      echo "pacman"
-      return 0
-      ;;
-    ubuntu | debian)
-      echo "apt"
-      return 0
-      ;;
-    fedora)
-      echo "dnf"
-      return 0
-      ;;
-    opensuse*)
-      echo "zypper"
-      return 0
-      ;;
-    alpine)
-      echo "apk"
-      return 0
-      ;;
-    void)
-      echo "xbps"
+    $pattern)
+      echo "$pm"
       return 0
       ;;
     esac
+  done <"$data"
+
+  while IFS= read -r line; do
+    case "$line" in
+    'LIKE:'*) ;;
+    *) continue ;;
+    esac
+    rest="${line#LIKE:}"
+    pattern="${rest%:*}"
+    pm="${rest##*:}"
+    # shellcheck disable=SC2254 # intentional: $pattern must glob-match, not match literally
     case "$like_val" in
-    *arch*)
-      echo "pacman"
-      return 0
-      ;;
-    *debian*)
-      echo "apt"
-      return 0
-      ;;
-    *fedora* | *rhel*)
-      echo "dnf"
-      return 0
-      ;;
-    *suse*)
-      echo "zypper"
+    $pattern)
+      echo "$pm"
       return 0
       ;;
     esac
-  fi
+  done <"$data"
+
   return 1
 }
 
@@ -178,6 +168,7 @@ pm_install_cmd() {
   zypper) echo "${SUDO_PREFIX}zypper install$(printf ' %s' "$@")" ;;
   apk) echo "${SUDO_PREFIX}apk add$(printf ' %s' "$@")" ;;
   xbps) echo "${SUDO_PREFIX}xbps-install$(printf ' %s' "$@")" ;;
+  nix) echo "nix-env -iA$(printf ' nixpkgs.%s' "$@")" ;;
   *) echo "install these using your system's package manager:$(printf ' %s' "$@")" ;;
   esac
 }
@@ -218,23 +209,32 @@ section "Checking packages"
 
 PM=$(detect_pkg_manager) || PM=""
 SUDO_PREFIX=""
-[ -n "$PM" ] && [ "$PM" != "pkg" ] && [ "$(id -u)" -ne 0 ] && SUDO_PREFIX="sudo "
+[ -n "$PM" ] && [ "$PM" != "pkg" ] && [ "$PM" != "nix" ] && [ "$(id -u)" -ne 0 ] && SUDO_PREFIX="sudo "
 
-REQUIRED_PKGS="zsh git curl yazi fzf zoxide eza fd bat unzip less glow"
-OPTIONAL_PKGS="neovim unrar zstd ptpython"
+missing_optional=""
+pkgdata="$LICHTAR_HOME/bin/data/packages.txt"
+while IFS= read -r line; do
+  case "$line" in
+  '' | '#'*) continue ;;
+  esac
+  ptype="${line%% *}"
+  pentry="${line#* }"
+  pname="${pentry%%:*}"
+  pbin="${pentry#*:}"
+  [ "$pbin" = "$pentry" ] && pbin="$pname"
+  if ! command -v "$pbin" >/dev/null 2>&1; then
+    case "$ptype" in
+    required) missing_required="$missing_required $pname" ;;
+    optional) missing_optional="$missing_optional $pname" ;;
+    esac
+  fi
+done <"$pkgdata"
 
-missing_required=""
-for p in $REQUIRED_PKGS; do
-  command -v "$p" >/dev/null 2>&1 || missing_required="$missing_required $p"
-done
+# p7zip: 3-way binary fallback, doesn't fit the name:binary format above —
+# stays hardcoded identically in both install.sh and lichtar_doctor.zsh.
 if ! command -v p7zip >/dev/null 2>&1 && ! command -v 7z >/dev/null 2>&1 && ! command -v 7za >/dev/null 2>&1; then
   missing_required="$missing_required p7zip"
 fi
-
-missing_optional=""
-for p in $OPTIONAL_PKGS; do
-  command -v "$p" >/dev/null 2>&1 || missing_optional="$missing_optional $p"
-done
 
 if [ -z "$missing_required" ]; then
   ok "All required packages already installed"
@@ -317,9 +317,9 @@ if [ -f "$HOME/.zshrc" ] && grep -q "LICHTAR_HOME" "$HOME/.zshrc" 2>/dev/null; t
 elif [ -f "$HOME/.zshrc" ]; then
   backup="$HOME/.zshrc.lichtar-backup-$(date +%Y%m%d%H%M%S)"
   warn "$HOME/.zshrc already exists and does not reference lichtar."
-  if confirm_always "Back up existing $HOME/.zshrc to $(basename "$backup") and replace it?"; then
+  if confirm_always "Back up existing $HOME/.zshrc to $(basename "$backup") and add lichtar's loader to the end?"; then
     cp "$HOME/.zshrc" "$backup"
-    printf '%s' "$LOADER" >"$HOME/.zshrc"
+    printf '\n%s' "$LOADER" >>"$HOME/.zshrc"
     ok "Backed up to $backup"
     ok "Installed lichtar $HOME/.zshrc"
   else
@@ -338,20 +338,27 @@ fi
 section "Nerd Font"
 
 if [ -n "$TERMUX_VERSION" ]; then
-  FONT_URL="https://github.com/ryanoasis/nerd-fonts/raw/HEAD/patched-fonts/JetBrainsMono/Fonts/JetBrainsMonoNerdFont-Regular.ttf"
+  FONT_URL="https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip"
 
   if [ -f "$HOME/.termux/font.ttf" ]; then
     info "$HOME/.termux/font.ttf already exists — leaving it as-is"
   elif confirm "Download and install JetBrainsMono Nerd Font?"; then
     mkdir -p "$HOME/.termux"
-    if command -v curl >/dev/null 2>&1; then
-      if curl -fsLo "$HOME/.termux/font.ttf" "$FONT_URL"; then
+    if command -v curl >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
+      font_tmp=$(mktemp -d)
+      if curl -fsLo "$font_tmp/JetBrainsMono.zip" "$FONT_URL" &&
+        unzip -p "$font_tmp/JetBrainsMono.zip" "JetBrainsMonoNerdFont-Regular.ttf" \
+          >"$HOME/.termux/font.ttf" 2>/dev/null &&
+        [ -s "$HOME/.termux/font.ttf" ]; then
         ok "Font installed"
       else
-        warn "Font download failed — install manually later"
+        rm -f "$HOME/.termux/font.ttf"
+        warn "Font download/extraction failed — install manually:"
+        warn "  $FONT_URL"
       fi
+      rm -rf "$font_tmp"
     else
-      warn "curl not found — install the font manually:"
+      warn "curl and/or unzip not found — install the font manually:"
       warn "  $FONT_URL"
     fi
     command -v termux-reload-settings >/dev/null 2>&1 && termux-reload-settings

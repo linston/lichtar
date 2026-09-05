@@ -10,6 +10,7 @@
 
 _lichtar_system() {
     : "${LICHTAR_HOME:=$HOME/.lichtar}"
+    source "$LICHTAR_HOME/bin/_cli_common.zsh"
 
     local FORCE=0
     local NO_COLOR=0
@@ -47,11 +48,6 @@ EOF
 
     local B NC HDR TXT TXM ACC BADGE
     if (( NO_COLOR == 0 )); then
-        _hex2a() {
-            local hex="${1#\#}"
-            local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
-            printf "\e[38;2;%d;%d;%dm" $r $g $b
-        }
         B=$'\e[1m'; NC=$'\e[0m'
         HDR="$(_hex2a "${CL_MTN_HDR:-#80a08a}")"
         TXT="$(_hex2a "${CL_MTN_TXT:-#cdd6f4}")"
@@ -63,12 +59,12 @@ EOF
         B="" NC="" HDR="" TXT="" TXM="" ACC="" BADGE=""
     fi
 
-    # same "local funcname() doesn't scope in zsh" gotcha as doctor/update —
-    # clean up explicitly on every exit
+    # has/section/ok/skip/warn/detail/_hex2a are shared — see
+    # bin/_cli_common.zsh. Nothing system.zsh-specific leaks besides itself.
     _system_cleanup() {
-        unfunction _hex2a _system_cleanup 2>/dev/null
+        _lichtar_cli_cleanup _system_cleanup
     }
-    trap _system_cleanup EXIT
+    trap _system_cleanup EXIT INT TERM
 
     printf "\n  ${HDR}${B}          LICHTAR  SYSTEM            ${NC}\n"
     printf "  ${ACC}${B}─────────────────────────────────────${NC}\n\n"

@@ -6,8 +6,8 @@
 # ── Completion path ───────────────────────────────────────────────────────────
 fpath=(
     "$LICHTAR_HOME/plugins/zsh-completions/src"
-    "$PREFIX/share/zsh/site-functions"
-    "$PREFIX/share/zsh/vendor-completions"
+    ${PREFIX:+"$PREFIX/share/zsh/site-functions"}
+    ${PREFIX:+"$PREFIX/share/zsh/vendor-completions"}
     $fpath
 )
 autoload -Uz compinit

@@ -6,10 +6,18 @@
 # Exception: CL_MAN_* use ANSI SGR codes (e.g. "1;32") because they are
 # passed directly to LESS_TERMCAP_* variables, not to zsh %F{}.
 #
-# To create a new theme: copy this file, rename it, change the hex values.
-# Load it by setting LICHTAR_THEME=your-theme-name in .env
+# To create a new theme (e.g. "your-theme"):
+#   1. Copy this file to your-theme.zsh, change the hex/CL_* values.
+#   2. Copy the 4 filename-matched sub-theme files and update their content:
+#        themes/fzf/your-theme.sh
+#        themes/fast-syntax-highlighting/your-theme.ini
+#        themes/glow/your-theme.json
+#        themes/eza/your-theme/theme.yml   (eza requires this exact filename)
+#   3. bat is the one exception — BAT_CONFIG_DIR is shared across themes, so
+#      just drop a new .tmTheme into themes/bat/ and update BAT_THEME above
+#      to match its internal <key>name</key>.
+#   4. Set LICHTAR_THEME=your-theme in .env
 # =============================================================================
-
 
 # ── Distros  ─────────────────────────────────────────────────────────────────
 export CL_DISTRO_ANDROID="#80f080" 
@@ -89,14 +97,21 @@ export CL_HLP_ACC="#94e2d5"   # accents
 export CL_HLP_VAL="#cdd6f4"   # values
 
 # ── bat ─────────────────────────────────────────────────────────────────────
-export BAT_CONFIG_DIR="$HOME/.lichtar/themes/bat/"
+# BAT_CONFIG_DIR stays a single shared directory — bat supports multiple named
+# themes side by side, selected by BAT_THEME (matched against each file's own
+# internal <key>name</key>, not by filename). A new theme needs its own
+# .tmTheme file dropped in here AND this BAT_THEME value updated to match.
+export BAT_CONFIG_DIR="$LICHTAR_HOME/themes/bat/"
 export BAT_THEME="Catppuccin Mocha"
 
 # ── eza ─────────────────────────────────────────────────────────────────────
-export EZA_CONFIG_DIR="$HOME/.lichtar/themes/eza"
+# eza only ever reads a file literally named theme.yml (its own hard
+# requirement, not lichtar's choice) — so unlike bat, the theme has to live
+# in the directory name, not the filename.
+export EZA_CONFIG_DIR="$LICHTAR_HOME/themes/eza/${LICHTAR_THEME}"
 
 # ── fzf ──────────────────────────────────────────────────────────────────────
-source "$HOME/.lichtar/themes/fzf/catppuccin-fzf-mocha.sh"
+source "$LICHTAR_HOME/themes/fzf/${LICHTAR_THEME}.sh"
 zstyle ':fzf-tab:*' use-fzf-default-opts yes
 
 # ── zsh-autosuggestions ───────────────────────────────────────────────────────
@@ -105,10 +120,10 @@ export CL_SUG="#585b70"   # suggestion text color (Overlay0 — subtle, not dist
 # ── fast-syntax-highlighting ──────────────────────────────────────────────────
 # NOTE: only exports the theme path here — the actual `fast-theme` call must
 # happen AFTER the plugin is loaded (see plugins/load.zsh)
-export CL_FSH_THEME_INI="$LICHTAR_HOME/themes/fast-syntax-highlighting/catppuccin-mocha.ini"
+export CL_FSH_THEME_INI="$LICHTAR_HOME/themes/fast-syntax-highlighting/${LICHTAR_THEME}.ini"
 
 # Applied by `md()` / `lichtar changelog` — glow reads this automatically
-export GLOW_STYLE="$LICHTAR_HOME/themes/glow/catppuccin-mocha.json"
+export GLOW_STYLE="$LICHTAR_HOME/themes/glow/${LICHTAR_THEME}.json"
 
 # ── Man pages (ANSI SGR codes, not hex) ───────────────────────────────────────
 CL_MAN_HDR="38;5;189"  # bold headings

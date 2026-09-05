@@ -33,7 +33,12 @@ LICHTAR_PROFILE="${LICHTAR_PROFILE:-0}"
 
 # ── Profile helper ────────────────────────────────────────────────────────────
 zmodload zsh/datetime 2>/dev/null
-typeset -gF _lichtar_t0
+# NOTE: every module file below relies on being sourced through this function.
+# Because `source` runs inside _lichtar_load's own call frame, a bare `local`
+# at a module file's "top level" is actually scoped to THIS function call —
+# it does not leak globally and does not persist between files. Sourcing a
+# module file directly (bypassing _lichtar_load) breaks that contract: any
+# `local` in it would then leak into whatever scope did the sourcing instead.
 _lichtar_load() {
     local file="$1"
     if (( LICHTAR_PROFILE )); then
@@ -62,11 +67,11 @@ _lichtar_load "$LICHTAR_HOME/core/options.zsh"
 # ── Non-ASCII guard (must be before plugins) ──────────────────────────────────
 _lichtar_load "$LICHTAR_HOME/widgets/guard.zsh"
 
+# ── Completion (before plugins — fzf-tab requires compinit to already exist) ──
+_lichtar_load "$LICHTAR_HOME/core/completion.zsh"
+
 # ── Plugins ───────────────────────────────────────────────────────────────────
 _lichtar_load "$LICHTAR_HOME/plugins/load.zsh"
-
-# ── Completion (after plugins) ────────────────────────────────────────────────
-_lichtar_load "$LICHTAR_HOME/core/completion.zsh"
 
 # ── UI ────────────────────────────────────────────────────────────────────────
 _lichtar_load "$LICHTAR_HOME/ui/langs.zsh"
@@ -77,6 +82,10 @@ _lichtar_load "$LICHTAR_HOME/ui/prompt.zsh"
 _lichtar_load "$LICHTAR_HOME/core/misc.zsh"
 
 # ── Widgets — guard first, rest auto-loaded ───────────────────────────────────
+# Requires `extendedglob` (set in core/options.zsh, loaded above) for the `^`
+# negation to work. Without it, this glob silently matches nothing — via (N)
+# NULL_GLOB — and every widget except guard.zsh would fail to load with no
+# error at all. Keep core/options.zsh loading before this line.
 for _lf in "$LICHTAR_HOME"/widgets/^guard.zsh(N); do
     _lichtar_load "$_lf"
 done

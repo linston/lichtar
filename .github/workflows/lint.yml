@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   syntax-check:
     runs-on: ubuntu-latest
@@ -21,7 +24,7 @@ jobs:
               echo "::error file=$f::zsh syntax error"
               status=1
             fi
-          done < <(find . -name '*.zsh' -print0)
+          done < <(find . -name '*.zsh' -not -path "*/plugins/*/*" -print0)
           exit $status
 
       - name: Syntax-check install.sh (POSIX sh)
@@ -30,7 +33,7 @@ jobs:
       - name: Shellcheck shell scripts
         run: |
           command -v shellcheck >/dev/null 2>&1 || sudo apt-get install -y shellcheck
-          find . -name '*.sh' -exec shellcheck -s sh {} +
+          find . -name '*.sh' -not -path "*/plugins/*/*" -exec shellcheck -s sh {} +
 
       - name: Verify every prompt badge has a visible glyph
         run: python3 dev/check_badges.py

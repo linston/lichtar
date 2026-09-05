@@ -34,6 +34,7 @@ __fzf_cd_widget() {
 
 zle -N __fzf_cd_widget
 bindkey '^F' __fzf_cd_widget
+bindkey '^[c' __fzf_cd_widget
 
 # zoxide widget lives in widgets/zoxide.zsh
 
@@ -41,6 +42,8 @@ bindkey '^F' __fzf_cd_widget
 # History frequency log — feeds CTRL+R ranking
 # Registered as a preexec hook in init.zsh (after autoload -Uz add-zsh-hook)
 # ==========================================
+typeset -gi _lichtar_freq_count=0
+
 _lichtar_freq_log() {
     local cmd="$1"
     [[ -z "${cmd//[[:space:]]/}" ]] && return   # skip blank lines
@@ -50,7 +53,12 @@ _lichtar_freq_log() {
     [[ "$(LC_ALL=C printf '%s' "$first" | tr -d '[ -~]')" != "" ]] && return
     # collapse embedded newlines (heredocs, multi-line commands) into one line
     print -r -- "${cmd//$'\n'/ ; }" >> "$LICHTAR_FREQ_FILE"
-    # cap growth so the log doesn't grow forever
+    # cap growth so the log doesn't grow forever — only spawn `wc` every
+    # 200th command, not every single one (that was a fork+exec on every
+    # command typed, the same class of cost the fast-theme cache already
+    # avoided elsewhere)
+    (( _lichtar_freq_count = (_lichtar_freq_count + 1) % 200 ))
+    (( _lichtar_freq_count == 0 )) || return
     local lines
     lines=$(wc -l < "$LICHTAR_FREQ_FILE" 2>/dev/null)
     if (( lines > 40000 )); then

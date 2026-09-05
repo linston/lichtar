@@ -10,6 +10,7 @@
 
 _lichtar_doctor() {
     : "${LICHTAR_HOME:=$HOME/.lichtar}"
+    source "$LICHTAR_HOME/bin/_cli_common.zsh"
 
     # ── System info (package manager / platform for hints below) ───────────
     # Same lazy-generate pattern as init.zsh / lichtar_system.zsh — don't
@@ -54,11 +55,6 @@ EOF
     local B NC HDR ACC WRN KEY TXT TXM
     local S1 S2 S3 S4 S5 S6 S7
     if (( NO_COLOR == 0 )); then
-        local _hex2a() {
-            local hex="${1#\#}"
-            local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
-            printf "\e[38;2;%d;%d;%dm" $r $g $b
-        }
         B=$'\e[1m'; NC=$'\e[0m'
         HDR="$(_hex2a "${CL_MTN_HDR:-#80a08a}")"
         ACC="$(_hex2a "${CL_MTN_ACC:-#94e2d5}")"
@@ -80,12 +76,6 @@ EOF
         S1="" S2="" S3="" S4="" S5="" S6="" S7=""
     fi
 
-    has()     { command -v "$1" >/dev/null 2>&1; }
-    section() { printf "\n  ${B}${TXT}%s${NC}\n" "$1"; }
-    ok()      { printf "  ${KEY}${B}✔${NC}  ${TXT}%s${NC}\n" "$1"; }
-    skip()    { printf "  ${TXM}◦${NC}  ${TXM}%s${NC}\n" "$1"; }
-    warn()    { printf "  ${WRN}✘${NC}  ${TXT}%s${NC}\n" "$1"; }
-    detail()  { printf "     ${TXM}↳ %s${NC}\n" "$1"; }
     ask()     { printf "  ${ACC}?${NC}  ${TXT}%s${NC} ${TXM}[y/N]${NC} " "$1"; }
 
     pkg_install_hint() {
@@ -143,13 +133,13 @@ EOF
     }
 
     _doctor_cleanup() {
-        # same leak as lichtar_update.zsh — local funcname() {} doesn't scope
-        # in zsh, so clean up explicitly on every exit from this function
-        unfunction has section ok skip warn detail ask confirm_fix \
-            pkg_install_hint pkg_upgrade_hint \
-            version_ge check_min_version _hex2a _doctor_cleanup 2>/dev/null
+        # has/section/ok/skip/warn/detail/_hex2a are shared — see
+        # bin/_cli_common.zsh. Only doctor-specific leaks listed here.
+        _lichtar_cli_cleanup ask confirm_fix pkg_install_hint \
+            pkg_upgrade_hint version_ge check_min_version \
+            _doctor_cleanup
     }
-    trap _doctor_cleanup EXIT
+    trap _doctor_cleanup EXIT INT TERM
     
     printf "\n"
     printf "  ${HDR}${B}          LICHTAR  DOCTOR            ${NC}\n"
@@ -161,22 +151,37 @@ EOF
     # =========================================================================
     section "${S1}${B}${NC}  Dependencies"
 
-    local -a REQUIRED=(zsh git curl fzf zoxide eza fd bat yazi unzip less glow)
-    local -a OPTIONAL=(neovim unrar zstd ptpython micro)
+    # Read from bin/data/packages.txt — shared with install.sh (see that
+    # file's header for why this can't just be sourced directly).
+    local -a REQUIRED=() OPTIONAL=()
+    local -A PKG_BIN=()
+    local _pline _ptype _pentry _pname
+    while IFS= read -r _pline; do
+        [[ -z "$_pline" || "$_pline" == \#* ]] && continue
+        _ptype="${_pline%% *}"
+        _pentry="${_pline#* }"
+        _pname="${_pentry%%:*}"
+        [[ "$_pentry" == *:* ]] && PKG_BIN[$_pname]="${_pentry#*:}"
+        case "$_ptype" in
+            required) REQUIRED+=("$_pname") ;;
+            optional) OPTIONAL+=("$_pname") ;;
+        esac
+    done < "$LICHTAR_HOME/bin/data/packages.txt"
+
     local dep
 
     for dep in "${REQUIRED[@]}"; do
-        if has "$dep"; then
+        if has "${PKG_BIN[$dep]:-$dep}"; then
             ok "$dep"
         else
             warn "$dep — not found"
             detail "$(pkg_install_hint "$dep")"
-            (( ISSUES++ ))  
+            (( ISSUES++ ))
         fi
     done
 
     for dep in "${OPTIONAL[@]}"; do
-        if has "$dep"; then
+        if has "${PKG_BIN[$dep]:-$dep}"; then
             ok "$dep (optional)"
         else
             skip "$dep (optional) — not found"
@@ -335,7 +340,8 @@ EOF
     if [[ -d "$cache_dir" ]]; then
         local zcd="$cache_dir/zcompdump"
         if [[ -f "$zcd" ]]; then
-            local age_h=$(( ( $(date +%s) - $(stat -c %Y "$zcd" 2>/dev/null || stat -f %m "$zcd" 2>/dev/null || echo 0) ) / 3600 ))
+            zmodload zsh/datetime zsh/stat 2>/dev/null
+            local age_h=$(( ( EPOCHSECONDS - $(zstat +mtime "$zcd" 2>/dev/null || echo 0) ) / 3600 ))  
             ok "zcompdump  (age: ${age_h}h)"
         else
             skip "zcompdump — not yet generated"

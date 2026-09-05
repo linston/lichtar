@@ -13,7 +13,7 @@ if ! command -v zsh >/dev/null 2>&1; then
   echo "zsh not found — can't run this check locally" >&2
   status=1
 else
-  find . -name '*.zsh' -exec sh -c '
+  find . -name '*.zsh' -not -path "*/plugins/*/*" -exec sh -c '
     status=0
     for f do
       out=$(zsh -n "$f" 2>&1) || {
@@ -30,7 +30,7 @@ sh -n bin/install.sh || status=1
 
 echo "== shellcheck =="
 if command -v shellcheck >/dev/null 2>&1; then
-  find . -name '*.sh' -exec shellcheck -s sh {} + || status=1
+  find . -name '*.sh' -not -path "*/plugins/*/*" -exec shellcheck -s sh {} + || status=1
 else
   echo "shellcheck not installed locally — CI will still run it"
 fi

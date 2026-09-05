@@ -17,9 +17,11 @@ ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=60
 ZSH_AUTOSUGGEST_USE_ASYNC=1
 
 # ── Load plugins ──────────────────────────────────────────────────────────────
+# fzf-tab first: its README requires loading before compinit-adjacent widget
+# wrapping happens in zsh-autosuggestions/fast-syntax-highlighting below.
+_load_plugin fzf-tab                          fzf-tab.plugin.zsh
 _load_plugin zsh-autosuggestions              zsh-autosuggestions.zsh
 _load_plugin zsh-history-substring-search     zsh-history-substring-search.zsh
-_load_plugin fzf-tab                          fzf-tab.plugin.zsh
 _load_plugin fast-syntax-highlighting         fast-syntax-highlighting.plugin.zsh
 # zsh-autopair calls autopair-init itself at the end of the plugin file —
 # calling it again here was a needless duplicate init on every startup.

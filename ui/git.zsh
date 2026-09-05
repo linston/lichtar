@@ -20,9 +20,9 @@ function _git_status_optimized() {
             local ahead=${g_counts%$'\t'*} behind=${g_counts#*$'\t'}
             (( ahead > 0 )) && _git_ahead_behind+="%F{$CL_GAH}⇡${ahead}%f"
             (( behind > 0 )) && _git_ahead_behind+="%F{$CL_GBH}⇣${behind}%f"
-            [[ -n "$_git_ahead_behind" ]] && _git_ahead_behind=" ${_git_ahead_behind}"
         fi
     fi
+    [[ -n "$_git_ahead_behind" ]] && _git_ahead_behind=" ${_git_ahead_behind}"
     _g_cache_pwd="$PWD"
     _g_cache_ab="$_git_ahead_behind"
     _g_cache_time=$EPOCHSECONDS

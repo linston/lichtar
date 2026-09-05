@@ -27,7 +27,6 @@ function _build_path() {
         else
             local c_val=$CL_GDR
             (( i == len - 1 )) && c_val=$CL_PDR
-            (( i == len - 2 && len > 3 )) && c_val=$CL_GDR
             res+="%F{$c_val}${parts[$i]}%f%F{$CL_DVD}/%f"
         fi
     done
@@ -42,17 +41,21 @@ function _timer_preexec() {
     _t_start=$SECONDS; _t_active=1 
     [[ "$1" == git\ * || "$1" == "g "* || "$1" == lazygit* || "$1" == tig* ]] && _g_cache_pwd="" 
 }
+
 function _timer_display() {
-    _cmd_duration=""
     if (( _t_active )); then
         local d=$(( SECONDS - _t_start ))
+
         if (( d >= 60 )); then
             _cmd_duration="%F{$CL_DUR}$((d/60))m$((d%60))s %f"
         elif (( d >= 2 )); then
             _cmd_duration="%F{$CL_DUR}${d}s %f"
+        else
+            _cmd_duration=""
         fi
+
+        _t_active=0
     fi
-    _t_active=0
 }
 
 # --- 2.8 UI Assembler ---
@@ -64,7 +67,8 @@ function _assemble_prompt() {
     _timer_display
     
     local _badge_color_var="CL_DISTRO_${LICHTAR_ICON_COLOR:-DEFAULT}"
-    local badge="%B%F{${(P)_badge_color_var}}${LICHTAR_ICON} %b%f"
+    local badge="%B%F{${(P)_badge_color_var:-#7c7f93}}${LICHTAR_ICON} %b%f"
+
     [[ -n "$SSH_CONNECTION" ]] && badge="%B%F{$CL_SSH}󰣀 %b%f"
     [[ $EUID -eq 0 ]] && badge="%B%F{$CL_LOK}🔒 %b%f"
 
@@ -72,21 +76,24 @@ function _assemble_prompt() {
     local jobs="%(1j.%F{$CL_BJB} .)"
     local arrow=" %(?.%B%F{$CL_SCS}.%B%F{$CL_FLR})❯%b%f"
 
-    PROMPT=$'\n'"${badge}${_rendered_path}${vcs_info_msg_0_}${_git_ahead_behind}${_l_cache_val}"$'\n'"%F{$CL_LNL}└─%f${err}${jobs}${arrow} "
+    local left="%F{$CL_LNL}└─%f${err}${jobs}${arrow} "
+    local right='${_cmd_duration}%F{$CL_TIM} %D{%H:%M}%f'
+
+    PROMPT=$'\n'"${badge}${_rendered_path}${vcs_info_msg_0_}${_git_ahead_behind}${_l_cache_val}"$'\n'"${left}"
+    RPROMPT="${right}"
 }
 
 # ==========================================
 # 3. INTERFACE AND HOOKS
 # ==========================================
-# Clear right prompt (clock) before executing commands and on resize reflow
-setopt no_prompt_cr
+setopt prompt_cr
 setopt prompt_subst
+unsetopt transient_rprompt
 
-# Transient prompt: automatically erases RPROMPT so it never stays in scrollback
-zle-line-finish() {
-  RPROMPT=""
-  zle reset-prompt
+# Put RPROMPT flush against the right edge.
+ZLE_RPROMPT_INDENT=0
+
+# Re-render only the currently active prompt after terminal resize.
+TRAPWINCH() {
+    [[ -o zle ]] && zle reset-prompt
 }
-zle -N zle-line-finish
-
-RPROMPT='${_cmd_duration}%F{$CL_TIM} %D{%H:%M}%f'

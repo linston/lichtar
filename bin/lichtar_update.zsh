@@ -11,8 +11,9 @@
 
 _lichtar_update() {
     : "${LICHTAR_HOME:=$HOME/.lichtar}"
+    source "$LICHTAR_HOME/bin/_cli_common.zsh"
+    
     local SECONDS=0
-
     local VERBOSE=0
     local DRYRUN=0
     local NO_COLOR=0
@@ -60,17 +61,12 @@ EOF
                 return 1
                 ;;
         esac
-        shift
+        (( $# > 0 )) && shift
     done
 
     # ── Theme colors (hex → ANSI truecolor) ─────────────────────────────────
     local B NC HDR ACC WRN KEY TXT TXM LHT ZSHC YZI
     if (( NO_COLOR == 0 )); then
-        local _hex2a() {
-            local hex="${1#\#}"
-            local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
-            printf "\e[38;2;%d;%d;%dm" $r $g $b
-        }
         B=$'\e[1m'; NC=$'\e[0m'
         HDR="$(_hex2a "${CL_MTN_HDR}")"   # header
         ACC="$(_hex2a "${CL_MTN_ACC}")"   # accents
@@ -79,18 +75,11 @@ EOF
         TXT="$(_hex2a "${CL_MTN_TXT}")"   # text
         TXM="$(_hex2a "${CL_MTN_TXM}")"   # text muted
         LHT="$(_hex2a "${CL_MTN_LHT}")"   # lichtar
-        ZSHC="$(_hex2a "${CL_MTN_ZSH}")"  # zsh plugins
+        ZSHC="$(_hex2a "${CL_MTN_ZSH:-#fab387}")"  # zsh plugins
         YZI="$(_hex2a "${CL_MTN_YZI}")"   # yazi plugins
     else
         B="" NC="" HDR="" ACC="" WRN="" KEY="" TXT="" TXM="" LHT="" ZSHC="" YZI=""
     fi
-
-    has()     { command -v "$1" >/dev/null 2>&1; }
-    section() { printf "\n  ${B}${TXT}%s${NC}\n" "$1"; }
-    ok()      { printf "  ${KEY}${B}✔${NC}  ${TXT}%s${NC}\n" "$1"; }
-    skip()    { printf "  ${TXM}◦${NC}  ${TXM}%s${NC}\n" "$1"; }
-    warn()    { printf "  ${WRN}✘${NC}  ${TXT}%s${NC}\n" "$1"; }
-    detail()  { printf "     ${TXM}↳ %s${NC}\n" "$1"; }
 
     log_line() { printf "[%s] %s\n" "$(date '+%F %T')" "$1" >> "$LOG_FILE"; }
 
@@ -123,7 +112,7 @@ EOF
           done
         ) &
         _SPIN_PID=$!
-        disown $_SPIN_PID 2>/dev/null
+        disown "$_SPIN_PID" 2>/dev/null
     }
     spinner_stop() {
         (( NO_SPINNER == 1 )) && return 0
@@ -138,11 +127,10 @@ EOF
 
     local _cleanup() {
         spinner_stop
-        # `local funcname() {}` does NOT actually scope a function in zsh —
-        # every helper below leaks into the global namespace. Clean them up
-        # here so `lichtar update` doesn't permanently pollute the shell.
-        unfunction has section ok skip warn detail log_line print_limited_list \
-            spinner_start spinner_stop run _hex2a _cleanup 2>/dev/null
+        # has/section/ok/skip/warn/detail/_hex2a are shared — see
+        # bin/_cli_common.zsh. Only update-specific leaks listed here.
+        _lichtar_cli_cleanup log_line print_limited_list \
+            spinner_start spinner_stop run _cleanup
     }
     trap _cleanup EXIT INT TERM
 
@@ -214,6 +202,16 @@ EOF
                 for _f in $(find "$LICHTAR_HOME" -name '*.zsh' -not -path "*/plugins/*/*"); do
                     zsh -n "$_f" 2>/dev/null || _syntax_bad=1
                 done
+
+                # Static checks above only see *.zsh files, so bin/lichtar
+                # itself (no extension) is never covered. Actually running
+                # it closes that gap and also catches runtime errors a
+                # syntax check can't (missing function, bad call) — same
+                # idea as CI's install-smoke-test job. `system` specifically
+                # because it's non-interactive and makes no network calls.
+                if (( _syntax_bad == 0 )); then
+                    "$LICHTAR_HOME/bin/lichtar" system --no-color >/dev/null 2>&1 || _syntax_bad=1
+                fi
 
                 if (( _syntax_bad )); then
                     warn "New version failed a syntax check — rolling back to ${before}"

@@ -1,0 +1,37 @@
+# =============================================================================
+# lichtar — bin/data/distro-pkgmanager.txt
+# Single source of truth for distro ID → package manager, read by both
+# install.sh (POSIX sh) and bin/system_detect.zsh (zsh). Neither file can
+# source the other's code (install.sh must run under plain /bin/sh, possibly
+# before zsh exists) — this plain-text file is the shared part instead.
+#
+# Format: one mapping per line, "pattern:pkgmanager". Blank lines and lines
+# starting with # are ignored. Patterns are shell glob patterns matched via
+# each reader's own `case` — see install.sh / system_detect.zsh for exactly
+# how each one consumes this file.
+#
+# Section 1: matched against /etc/os-release's ID directly.
+# Section 2 (prefixed LIKE:): matched against ID_LIKE as a fallback, only
+# when no Section 1 pattern matched ID. Order matters within this section —
+# first match wins, same as it always has in system_detect.zsh's case.
+# =============================================================================
+
+arch:pacman
+archarm:pacman
+endeavouros:pacman
+manjaro:pacman
+manjaro-arm:pacman
+ubuntu:apt
+debian:apt
+fedora:dnf
+opensuse*:zypper
+alpine:apk
+nixos:nix
+void:xbps
+
+LIKE:*arch*:pacman
+LIKE:*debian*:apt
+LIKE:*ubuntu*:apt
+LIKE:*fedora*:dnf
+LIKE:*rhel*:dnf
+LIKE:*suse*:zypper

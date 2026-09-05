@@ -11,6 +11,7 @@ extract() {
     case "$1" in
         *.tar.bz2) tar xjf "$1" ;;
         *.tar.gz)  tar xzf "$1" ;;
+        *.tgz)     tar xzf "$1" ;;
         *.tar.xz)  tar xJf "$1" ;;
         *.zip)     unzip "$1" ;;
         *.7z)      7z x "$1" ;;
@@ -25,6 +26,7 @@ extract() {
 zrc() {
     add-zsh-hook -d precmd _assemble_prompt
     add-zsh-hook -d preexec _timer_preexec
+    add-zsh-hook -d preexec _lichtar_freq_log
     "$EDITOR" ~/.zshrc && source ~/.zshrc
 }
 

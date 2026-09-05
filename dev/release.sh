@@ -27,6 +27,11 @@ grep -q "^## \[Unreleased\]" "$CHANGELOG" || {
   exit 1
 }
 
+git rev-parse "$VERSION" >/dev/null 2>&1 && {
+  echo "Tag $VERSION already exists" >&2
+  exit 1
+}
+
 tmp=$(mktemp)
 awk -v version="$VERSION" -v date="$DATE" '
 /^## \[Unreleased\]/ && !done {

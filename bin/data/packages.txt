@@ -1,0 +1,36 @@
+# =============================================================================
+# lichtar — bin/data/packages.txt
+# Single source of truth for required/optional dependencies, read by both
+# install.sh (POSIX sh) and bin/lichtar_doctor.zsh (zsh).
+#
+# Format: "required|optional name[:binary]". Package name is what gets
+# printed and passed to the package manager's install command. The optional
+# :binary suffix is only needed when `command -v` must check a DIFFERENT
+# name than the package (e.g. the neovim package installs an `nvim` binary;
+# openssh installs `ssh-agent`, not a binary literally called `openssh`).
+# Without a :binary suffix, the package name is checked as-is.
+#
+# p7zip is intentionally NOT here — its check is a 3-way binary fallback
+# (p7zip/7z/7za) that doesn't fit this format, and stays hardcoded
+# identically in both install.sh and lichtar_doctor.zsh.
+# =============================================================================
+
+required zsh
+required git
+required curl
+required fzf
+required zoxide
+required eza
+required fd
+required bat
+required yazi
+required unzip
+required less
+required glow
+
+optional neovim:nvim
+optional unrar
+optional zstd
+optional ptpython
+optional micro
+optional openssh:ssh-agent

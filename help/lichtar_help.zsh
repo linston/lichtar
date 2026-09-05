@@ -126,14 +126,14 @@ _lichtar_help_render() {
         _B "Each tool solves a different problem — learn them gradually."
         _BR
 
-        _SS "Fuzzy Directory Jump — Ctrl+F  (fzf)"
+        _SS "Fuzzy Directory Jump — Ctrl+F / Alt+C  (fzf)"
         _B "Opens an interactive list of subdirectories up to 4 levels deep."
         _B "Uses fd if available, falls back to find."
-        _R "Ctrl+F"         "open directory browser"
+        _R "Ctrl+F / Alt+C"  "open directory browser  (same widget, two bindings)"
         _R "Type to filter" "narrows the list in real time"
         _R "Enter"          "jump to selected directory"
         _R "Esc"            "cancel without moving"
-        _X "Ctrl+F → type 'src' → select ~/devflow/src/core → Enter"
+        _X "Ctrl+F / Alt+C → type 'src' → select ~/devflow/src/core → Enter"
         _BR
 
         _SS "Smart Frecency Jump — Ctrl+G  (zoxide)"
@@ -144,6 +144,15 @@ _lichtar_help_render() {
         _N "First use: visit directories normally — zoxide builds its database."
         _X "Ctrl+G → type 'flow' → jumps to ~/projects/devflow"
         _X "z dev           ← jumps to your most-visited 'dev*' directory"
+        _BR
+
+        _SS "Directory History — Alt+Left / Alt+Right"
+        _B "Browser-style back/forward through directories you've visited"
+        _B "this session — tracks cd, zoxide, and the fzf pickers alike."
+        _R "Alt+Left"  "go back to the previous directory"
+        _R "Alt+Right" "go forward again (only if you've gone back first)"
+        _N "Navigating to a new directory after going back drops the old"
+        _N "\"forward\" history, same as a browser tab."
         _BR
 
         _SS "File Picker — Ctrl+T"
@@ -184,8 +193,9 @@ _lichtar_help_render() {
         _BR
 
         _SS "Clear Screen — Ctrl+L"
-        _B "Clears visible terminal output but preserves the scrollback buffer."
-        _B "Unlike 'clear', you can still scroll up to see previous output."
+        _B "Clears the visible screen AND the scrollback buffer — a full reset."
+        _B "Unlike plain 'clear' (which usually leaves scrollback intact),"
+        _B "you will NOT be able to scroll up to see previous output."
         ;;
 
     # ── PROMPT ────────────────────────────────────────────────────────────────
@@ -298,9 +308,14 @@ _lichtar_help_render() {
         _BR
 
         _SS "Cache management"
-        _R "exec zsh"  "full restart — clears all cached versions"
-        _R "cd <dir>"  "moving directories triggers re-detection"
+        _R "exec zsh"  "full restart — clears every cached version"
+        _R "cd <dir>"  "re-scans which languages are present in the new dir"
         _N "Version binaries are called lazily — only when the language is detected."
+        _N "A version, once fetched, is cached for the rest of the session and"
+        _N "reused everywhere — not just in this directory. Python and Node"
+        _N "re-check on venv/nvm switches; other languages don't, so a"
+        _N "directory-based version manager (rbenv, asdf, goenv...) for those"
+        _N "won't be picked up mid-session without: exec zsh"
         _N "Multiple languages can appear simultaneously in polyglot projects."
         ;;
 
@@ -522,11 +537,12 @@ _lichtar_help_render() {
         _BR
 
         _SS "Key bindings quick reference"
-        _R "Ctrl+F" "fzf directory browser"
+        _R "Ctrl+F / Alt+C" "fzf directory browser"
         _R "Ctrl+G" "zoxide smart jump"
+        _R "Alt+Left / Alt+Right" "directory back/forward history"
         _R "Ctrl+T" "fzf file picker"
         _R "Ctrl+R" "frequency-ranked history search"
-        _R "Ctrl+L" "clear screen  (preserves scrollback)"
+        _R "Ctrl+L" "clear screen + scrollback  (full reset)"
         _R "↑ / ↓"  "history substring search"
         _R "→"      "accept autosuggestion"
         ;;
@@ -844,12 +860,13 @@ _lichtar_help_render() {
         _BR
 
         _SS "Navigation"
-        _R "Ctrl+F"     "fzf fuzzy cd — browse subdirectories"
+        _R "Ctrl+F / Alt+C" "fzf fuzzy cd — browse subdirectories"
         _R "Ctrl+G"     "zoxide jump — frecency-based smart cd"
+        _R "Alt+Left / Alt+Right" "directory back/forward history"
         _R "Ctrl+T"     "fzf file picker — insert path into command"
         _R "Ctrl+R"     "fzf history search  (frequency-ranked)"
         _R "Alt+R"      "fzf history search  (plain, reverse-chronological)"
-        _R "Ctrl+L"     "clear screen  (scrollback preserved)"
+        _R "Ctrl+L"     "clear screen + scrollback  (full reset)"
         _R "<dirname>"  "AUTO_CD — enter directory without 'cd'"
         _R "up [N]"     "go up N levels  (default 1)"
         _R "mkcd <dir>" "mkdir + cd combined"

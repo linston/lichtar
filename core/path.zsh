@@ -11,7 +11,7 @@ path=(
     "$HOME/.zsh/scripts"
     "$HOME/bin"
     "$HOME/.local/bin"
-    "$PREFIX/bin"
+    ${PREFIX:+"$PREFIX/bin"}
     $path
 )
 export PATH
@@ -20,7 +20,8 @@ export PATH
 umask 027
 
 # ── Zsh modules ──────────────────────────────────────────────────────────────
-zmodload zsh/datetime    # EPOCHSECONDS for TTL cache
+# zsh/datetime is already loaded by init.zsh (needed there for EPOCHREALTIME
+# before the first _lichtar_load call even runs) — no need to repeat it here.
 zmodload zsh/zutil       # zparseopts support
 zmodload zsh/complist    # colored menu select
 
