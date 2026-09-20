@@ -9,6 +9,23 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+## [v0.1.3] - 2026-09-20
+
+### Fixed
+
+* Fixed the stash indicator not appearing in the prompt when working inside a git worktree.
+* Fixed `Ctrl+T`'s file picker inserting multiple selected files, or filenames containing spaces, incorrectly into the command line.
+* Fixed `lichtar` returning a success exit status for an unrecognized subcommand.
+* Fixed the fzf theme (colors, previews, and every fzf-based widget — Ctrl+R, Ctrl+T, Ctrl+F, Ctrl+G, Alt+C, Alt+R) failing to start at all on older fzf versions, such as the one currently packaged by Debian/Ubuntu stable.
+* Fixed temporary file creation in `lichtar update`, `install.sh`, the yazi integration, and the release script to respect `$TMPDIR` (falling back to `$PREFIX/tmp`) instead of a hardcoded `/tmp`.
+* Fixed `fd` and `bat` being reported as missing by `lichtar doctor`, and suggesting an install command that doesn't exist, on Debian/Ubuntu — both `install.sh` and `lichtar doctor` now know about the `fd-find`/`fdfind` and `bat`/`batcat` package/binary naming differences on `apt`.
+* Fixed `install.sh`'s "switch default shell to zsh" step reporting success on Termux and some proot-distro environments even when it silently changed nothing; it now verifies the change actually took effect and falls back to a `.bashrc` snippet that execs into zsh when it didn't.
+* Fixed `lichtar` erroring with a `shift` message when run with no arguments; it now prints the short usage line, matching `lichtar help` for the full reference.
+* Fixed the zoxide jump widget (Ctrl+G) clearing the command line even when the jump itself failed.
+* Fixed Alt+Left/Alt+Right directory history getting stuck when a visited directory no longer exists — it now skips past it, and shows a brief message that clears itself after a moment when there's nowhere further to go.
+* Fixed Node.js, Deno, and Bun all showing a version badge for the same plain `.js`/`.ts` files when no project manifest is present.
+* `extract` now also handles plain `.tar` archives and standalone `.xz` files.
+
 ## [v0.1.2] - 2026-09-05
 
 ### Added
