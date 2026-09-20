@@ -7,7 +7,9 @@ if command -v zoxide &>/dev/null; then
     eval "$(zoxide init zsh)"
     __zoxide_zi_cd() {
         local dir=$(zoxide query -l | fzf --height 45% --reverse --border --prompt='Jump to: ')
-        if [[ -n "$dir" ]]; then cd "$dir"; BUFFER=""; fi
+        if [[ -n "$dir" ]] && builtin cd -- "$dir"; then
+            BUFFER=""
+        fi
         _force_refresh_ui
     }
     zle -N __zoxide_zi_cd

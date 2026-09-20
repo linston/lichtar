@@ -14,8 +14,8 @@ L_DEFS=(
     lua   ";${CL_LUA};init.lua|stylua.toml|.lua-version;*.lua"
     cpp   ";${CL_CPP};CMakeLists.txt|Makefile;*.cpp|*.c|*.h"
     zig   ";${CL_ZIG};build.zig;*.zig"
-    deno  "󰲋;${CL_DEN};deno.json;*.ts|*.js"
-    bun   ";${CL_BUN};bun.lockb;*.ts|*.js"
+    deno  "󰲋;${CL_DEN};deno.json;"
+    bun   ";${CL_BUN};bun.lockb;"
 )
 
 typeset -gA L_CACHE_VER
@@ -61,9 +61,10 @@ _check_path_fast() {
     exts=(${(s:|:)2})
     local m e
     for m in $marks; do [[ -e "$m" ]] && return 0; done
-    
-    # POINT-fix Explicitly use noise ($3) and is_home ($4) to skip globs
-    (( ${3:-0} || ${4:-0} )) && return 1
+
+    # is_home ($3): skip the glob scan in $HOME itself — too many unrelated
+    # files there would otherwise trigger false-positive language badges.
+    (( ${3:-0} )) && return 1
     
     for e in $exts; do 
         local -a f
@@ -108,7 +109,7 @@ function _build_langs_optimized() {
         if [[ $id == "py" && -n "$VIRTUAL_ENV" ]]; then trigger=1
         elif [[ $id == "node" && -n "$NVM_BIN" ]]; then trigger=1
         else
-            _check_path_fast "$marks" "$exts" "$is_noise" "$is_home" && trigger=1
+            _check_path_fast "$marks" "$exts" "$is_home" && trigger=1
         fi
 
         if (( trigger )); then

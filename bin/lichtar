@@ -1,6 +1,29 @@
 #!/usr/bin/env zsh
 
 : "${LICHTAR_HOME:=$HOME/.lichtar}"
+
+_lichtar_usage() {
+    # Reuses the same CL_HLP_* palette as help/lichtar_help.zsh (with safe
+    # fallback hexes in case this runs before the theme is exported, e.g.
+    # invoked outside an initialized lichtar shell).
+    local BOLD=$'\e[1m' ITALIC=$'\e[3m' RESET=$'\e[0m'
+    local _u_hex() {
+        local h="${1#\#}"
+        printf "\e[38;2;%d;%d;%dm" $((16#${h:0:2})) $((16#${h:2:2})) $((16#${h:4:2}))
+    }
+    local HDR="$(_u_hex "${CL_HLP_HDR:-#f9e2af}")"
+    local SEC="$(_u_hex "${CL_HLP_SEC:-#fab387}")"
+    local KEY="$(_u_hex "${CL_HLP_KEY:-#a6e3a1}")"
+    local SEP="$(_u_hex "${CL_HLP_SEP:-#585b70}")"
+    local -a cmds=(version help update doctor system changelog)
+    local out="${ITALIC}${SEP}{" c first=1
+    for c in "${cmds[@]}"; do
+        (( first )) && first=0 || out+="${SEP}|"
+        out+="${KEY}${c}"
+    done
+    out+="${SEP}}${RESET}"
+    print -r -- "${BOLD}${HDR}Usage:${RESET} ${BOLD}${SEC}lichtar${RESET} ${out}"
+}
 if [[ ! -d "$LICHTAR_HOME" ]]; then
     echo "[lichtar] LICHTAR_HOME not found: $LICHTAR_HOME" >&2
     exit 1
@@ -8,37 +31,41 @@ fi
 
 source "$LICHTAR_HOME/help/lichtar_help.zsh"
 
-case "${1:-help}" in
+case "$1" in
+    "")
+        _lichtar_usage
+        ;;
     version)
         local v
         v=$(git -C "$LICHTAR_HOME" describe --tags --always --dirty 2>/dev/null) || v="unknown"
         echo "lichtar $v"
         ;;  
     help)
-        shift
+        (( $# > 0 )) && shift
         _lichtar_help "$@"
         ;;
     update)
-        shift
+        (( $# > 0 )) && shift
         source "$LICHTAR_HOME/bin/lichtar_update.zsh"
         _lichtar_update "$@"
         ;;
     doctor)
-        shift
+        (( $# > 0 )) && shift
         source "$LICHTAR_HOME/bin/lichtar_doctor.zsh"
         _lichtar_doctor "$@"
         ;;
     system)
-        shift
+        (( $# > 0 )) && shift
         source "$LICHTAR_HOME/bin/lichtar_system.zsh"
         _lichtar_system "$@"
         ;;
     changelog)
-        shift
+        (( $# > 0 )) && shift
         source "$LICHTAR_HOME/bin/lichtar_changelog.zsh"
         _lichtar_changelog "$@"
         ;;
     *)
-        echo "Usage: lichtar {version|help|update|doctor|system|changelog}"
+        _lichtar_usage >&2
+        exit 1
         ;;
 esac

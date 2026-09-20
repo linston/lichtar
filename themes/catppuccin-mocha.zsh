@@ -126,6 +126,6 @@ export CL_FSH_THEME_INI="$LICHTAR_HOME/themes/fast-syntax-highlighting/${LICHTAR
 export GLOW_STYLE="$LICHTAR_HOME/themes/glow/${LICHTAR_THEME}.json"
 
 # ── Man pages (ANSI SGR codes, not hex) ───────────────────────────────────────
-CL_MAN_HDR="38;5;189"  # bold headings
-CL_MAN_USR="38;5;116"  # underlined arguments
-CL_MAN_SRC="38;5;216"  # search highlights
+export CL_MAN_HDR="38;5;189"  # bold headings
+export CL_MAN_USR="38;5;116"  # underlined arguments
+export CL_MAN_SRC="38;5;216"  # search highlights

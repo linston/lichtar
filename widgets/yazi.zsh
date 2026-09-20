@@ -11,7 +11,7 @@ if (( ${LICHTAR_YAZI:-1} )); then
 
     function y() {
         local tmp cwd
-        tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+        tmp="$(mktemp "${TMPDIR:-$PREFIX/tmp}/yazi-cwd.XXXXXX")"
         command yazi "$@" --cwd-file="$tmp"
         if cwd="$(cat -- "$tmp")" && [[ -n "$cwd" && "$cwd" != "$PWD" ]]; then builtin cd -- "$cwd"; fi
         rm -f -- "$tmp"

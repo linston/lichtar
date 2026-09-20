@@ -17,7 +17,9 @@ extract() {
         *.7z)      7z x "$1" ;;
         *.rar)     unrar x "$1" ;;
         *.tar.zst) tar --zstd -xf "$1" ;;
+        *.tar)     tar xf "$1" ;;
         *.gz)      gunzip "$1" ;;
+        *.xz)      unxz "$1" ;;
         *.zst)     zstd -d "$1" ;;
         *) echo "extract: unknown format: $1" ;;
     esac

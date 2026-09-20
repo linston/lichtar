@@ -12,7 +12,7 @@ function _git_status_optimized() {
     (( LICHTAR_GIT_AHEAD )) || return
     [[ -z "$vcs_info_msg_0_" ]] && { _g_cache_pwd=""; return; }
     [[ "$PWD" == "$_g_cache_pwd" && $(( EPOCHSECONDS - _g_cache_time )) -lt 30 ]] && { _git_ahead_behind="$_g_cache_ab"; return; }
-    local stash_f="$(git rev-parse --git-dir 2>/dev/null)/refs/stash"
+    local stash_f="$(git rev-parse --git-common-dir 2>/dev/null)/refs/stash"
     [[ -f "$stash_f" ]] && _git_ahead_behind="%F{$CL_GAB}⚑%f"
     if git rev-parse --abbrev-ref @{u} >/dev/null 2>&1; then
         local g_counts; g_counts=$(git rev-list --left-right --count HEAD...@{u} 2>/dev/null)

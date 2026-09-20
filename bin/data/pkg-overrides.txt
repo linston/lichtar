@@ -1,0 +1,17 @@
+# Per-package-manager overrides where either the repo package name or the
+# installed binary (or both) differ from the generic name used elsewhere
+# in lichtar. Read identically by install.sh and lichtar_doctor.zsh.
+# Format: generic:pm:pkg_name:bin_name
+#
+# Only add entries you've verified — a wrong name here is worse than no
+# override at all (a missing entry just falls back to the generic name).
+
+# fd: Debian/Ubuntu's package predates and conflicts with an unrelated
+# existing package already named "fd", so both the apt package name and
+# the installed binary differ from every other supported distro.
+fd:apt:fd-find:fdfind
+# bat: same story, but only the binary collides — the apt package itself
+# is still called "bat".
+bat:apt:bat:batcat
+# p7zip: Arch renamed the package (not the binary) in its official repo.
+p7zip:pacman:7zip:p7zip

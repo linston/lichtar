@@ -32,7 +32,7 @@ git rev-parse "$VERSION" >/dev/null 2>&1 && {
   exit 1
 }
 
-tmp=$(mktemp)
+tmp=$(mktemp "${TMPDIR:-$PREFIX/tmp}/lichtar-release.XXXXXX")
 awk -v version="$VERSION" -v date="$DATE" '
 /^## \[Unreleased\]/ && !done {
     print
@@ -46,7 +46,7 @@ awk -v version="$VERSION" -v date="$DATE" '
 mv "$tmp" "$CHANGELOG"
 
 git add "$CHANGELOG"
-git commit -m "Release $VERSION"
+git commit --only "$CHANGELOG" -m "Release $VERSION"
 git tag "$VERSION"
 
 echo "Done. Review: git show HEAD && git tag -n $VERSION"

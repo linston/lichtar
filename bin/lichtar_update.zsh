@@ -144,7 +144,7 @@ EOF
             RUN_OUT=""; RUN_RC=0
             return 0
         fi
-        local tmp; tmp=$(mktemp 2>/dev/null || echo "/tmp/lichtar_update.$$.$RANDOM")
+        local tmp; tmp=$(mktemp "${TMPDIR:-$PREFIX/tmp}/lichtar_update.XXXXXX" 2>/dev/null || echo "${TMPDIR:-$PREFIX/tmp}/lichtar_update.$$.$RANDOM")
         : > "$tmp"
         spinner_start "$msg"
         "$@" >"$tmp" 2>&1
@@ -292,6 +292,11 @@ EOF
 
     if has ya; then
         if run "Upgrading yazi plugins…" ya pkg upgrade; then
+            # Text-matching `ya`'s own output, since it has no machine-readable
+            # mode for this. Known fragility: if a future yazi version changes
+            # this wording, this silently falls through to "Nothing to update"
+            # rather than erroring — not fixable without a `ya pkg upgrade`
+            # output-format guarantee that doesn't currently exist.
             if echo "$RUN_OUT" | grep -qi "Deploying\|Upgraded\|up-to-date\|up to date"; then
                 ok "Yazi plugins updated"
             else

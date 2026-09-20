@@ -49,7 +49,7 @@ _lichtar_freq_log() {
     [[ -z "${cmd//[[:space:]]/}" ]] && return   # skip blank lines
     [[ "$cmd" == ' '* ]] && return              # respect HIST_IGNORE_SPACE
     local first="${cmd%% *}"
-    # respect the same non-ASCII / wrong-layout guard as zshaddhistory()
+    # respect the same non-ASCII / wrong-layout guard as widgets/guard.zsh
     [[ "$(LC_ALL=C printf '%s' "$first" | tr -d '[ -~]')" != "" ]] && return
     # collapse embedded newlines (heredocs, multi-line commands) into one line
     print -r -- "${cmd//$'\n'/ ; }" >> "$LICHTAR_FREQ_FILE"
@@ -119,7 +119,12 @@ __fzf_file_widget() {
             fzf --height 45% --reverse --border --prompt='Files: ' --multi)
     fi
     if [[ -n "$selected" ]]; then
-        BUFFER="$BUFFER$selected"
+        # split multi-select output on newlines and shell-quote each path,
+        # so multiple selections and filenames with spaces/special chars
+        # both insert as separate, correctly-parsed arguments
+        local -a paths
+        paths=(${(f)selected})
+        BUFFER="$BUFFER${(q@)paths}"
         CURSOR=${#BUFFER}
     fi
     _force_refresh_ui

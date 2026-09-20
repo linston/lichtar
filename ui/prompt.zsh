@@ -6,7 +6,6 @@ function _build_path() {
     local p_raw="${(%):-%~}"
     local -a parts
     parts=(${(s:/:)p_raw})
-    parts=(${parts:#}) 
     
     local len=${#parts} res="" lock="" start=1
     [[ ! -w "$PWD" ]] && lock="%F{$CL_LOK}🔒 %f"
@@ -87,7 +86,6 @@ function _assemble_prompt() {
 # 3. INTERFACE AND HOOKS
 # ==========================================
 setopt prompt_cr
-setopt prompt_subst
 unsetopt transient_rprompt
 
 # Put RPROMPT flush against the right edge.

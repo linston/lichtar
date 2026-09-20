@@ -134,27 +134,47 @@ detect_pkg_manager() {
   return 1
 }
 
-# Package-name overrides where the generic name doesn't match a specific
-# package manager's repo name. Format: "<generic>:<pm>:<real_name>"
+# Per-package-manager overrides, for cases where either the repo package
+# name or the installed binary (or both) differ on one specific package
+# manager — e.g. fd/fd-find/fdfind and bat/bat/batcat on apt, and Arch's
+# p7zip package rename. Shared with lichtar_doctor.zsh (identical format).
+# Format: "<generic>:<pm>:<pkg_name>:<bin_name>"
 # Only add entries you've *verified* — a wrong name in a suggested
-# command is worse than no suggestion. Confirmed: Arch renamed
-# p7zip -> 7zip in its official repo.
-PKG_NAME_OVERRIDES="p7zip:pacman:7zip"
-
+# command is worse than no suggestion.
 resolve_pkg_name() {
-  # $1 = generic package name -> prints the resolved name for $PM
+  # $1 = generic package name -> prints the resolved package name for $PM
   generic="$1"
-  for entry in $PKG_NAME_OVERRIDES; do
+  while IFS= read -r entry; do
+    case "$entry" in '' | '#'*) continue ;; esac
     ov_generic=${entry%%:*}
     rest=${entry#*:}
     ov_pm=${rest%%:*}
-    ov_name=${rest#*:}
+    rest=${rest#*:}
+    ov_name=${rest%%:*}
     if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
       echo "$ov_name"
       return 0
     fi
-  done
+  done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
   echo "$generic"
+}
+
+resolve_pkg_bin() {
+  # $1 = generic package name -> prints the resolved binary name for $PM,
+  # or nothing if there's no override for it (caller keeps its own default)
+  generic="$1"
+  while IFS= read -r entry; do
+    case "$entry" in '' | '#'*) continue ;; esac
+    ov_generic=${entry%%:*}
+    rest=${entry#*:}
+    ov_pm=${rest%%:*}
+    rest=${rest#*:}
+    ov_bin=${rest#*:}
+    if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
+      echo "$ov_bin"
+      return 0
+    fi
+  done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
 }
 
 pm_install_cmd() {
@@ -222,6 +242,8 @@ while IFS= read -r line; do
   pname="${pentry%%:*}"
   pbin="${pentry#*:}"
   [ "$pbin" = "$pentry" ] && pbin="$pname"
+  pbin_override=$(resolve_pkg_bin "$pname")
+  [ -n "$pbin_override" ] && pbin="$pbin_override"
   if ! command -v "$pbin" >/dev/null 2>&1; then
     case "$ptype" in
     required) missing_required="$missing_required $pname" ;;
@@ -345,7 +367,7 @@ if [ -n "$TERMUX_VERSION" ]; then
   elif confirm "Download and install JetBrainsMono Nerd Font?"; then
     mkdir -p "$HOME/.termux"
     if command -v curl >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
-      font_tmp=$(mktemp -d)
+      font_tmp=$(mktemp -d "${TMPDIR:-$PREFIX/tmp}/lichtar-font.XXXXXX")
       if curl -fsLo "$font_tmp/JetBrainsMono.zip" "$FONT_URL" &&
         unzip -p "$font_tmp/JetBrainsMono.zip" "JetBrainsMonoNerdFont-Regular.ttf" \
           >"$HOME/.termux/font.ttf" 2>/dev/null &&
@@ -375,6 +397,25 @@ fi
 # =============================================================================
 section "Default shell"
 
+verify_shell_changed() {
+  # $1 = expected zsh path -> prints "yes" / "no" / "unknown"
+  if [ -n "$TERMUX_VERSION" ]; then
+    if [ "$(readlink "$HOME/.termux/shell" 2>/dev/null)" = "$1" ]; then
+      echo yes
+    else
+      echo no
+    fi
+  elif command -v getent >/dev/null 2>&1; then
+    if [ "$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)" = "$1" ]; then
+      echo yes
+    else
+      echo no
+    fi
+  else
+    echo unknown
+  fi
+}
+
 current_shell=$(basename "${SHELL:-unknown}")
 if [ "$current_shell" = "zsh" ]; then
   ok "zsh is already the default shell"
@@ -385,14 +426,37 @@ else
   ZSH_PATH=$(command -v zsh)
   warn "Current default shell is: $current_shell"
   if confirm "Switch default shell to zsh now? (chsh -s $ZSH_PATH)"; then
-    if chsh -s "$ZSH_PATH"; then
+    # Termux's own chsh prepends $PREFIX/bin/ to whatever name you give it,
+    # so it needs the bare command name, not a full path — a full path
+    # here silently fails: chsh still exits 0, but nothing actually changes.
+    if [ -n "$TERMUX_VERSION" ]; then
+      chsh -s "$(basename "$ZSH_PATH")" >/dev/null 2>&1
+    else
+      chsh -s "$ZSH_PATH" >/dev/null 2>&1
+    fi
+    # Don't trust chsh's own exit code — on Termux it reports success even
+    # when it silently did nothing, and the same has been observed on a
+    # proot-distro Arch install for reasons that weren't pinned down. Read
+    # back whatever actually got set instead of believing the exit status.
+    changed=$(verify_shell_changed "$ZSH_PATH")
+    if [ "$changed" = yes ]; then
       if [ -n "$TERMUX_VERSION" ]; then
         ok "Default shell changed to zsh — restart Termux to apply"
       else
         ok "Default shell changed to zsh — log out and back in to apply"
       fi
+    elif [ "$changed" = no ] && [ "$current_shell" = "bash" ] && [ -f "$HOME/.bashrc" ]; then
+      warn "chsh reported success but didn't actually change anything"
+      if ! grep -q 'exec .*zsh' "$HOME/.bashrc" 2>/dev/null; then
+        printf '\n# Added by lichtar install.sh: chsh did not take effect on this system\nif [ -z "$ZSH_VERSION" ]; then\n  exec "%s"\nfi\n' "$ZSH_PATH" >>"$HOME/.bashrc"
+        ok "Added a fallback to ~/.bashrc — zsh will start automatically from your next bash session"
+      else
+        info "~/.bashrc already execs into zsh — should already be working; check it manually"
+      fi
     else
-      warn "chsh failed — switch manually: chsh -s $ZSH_PATH"
+      warn "chsh may not have worked — switch manually: chsh -s $ZSH_PATH"
+      info "If that doesn't stick either, add this to the top of your shell's"
+      info "startup file: if [ -z \"\$ZSH_VERSION\" ]; then exec $ZSH_PATH; fi"
     fi
   else
     info "Skipped — switch manually later: chsh -s $ZSH_PATH"

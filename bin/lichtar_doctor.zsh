@@ -168,20 +168,37 @@ EOF
         esac
     done < "$LICHTAR_HOME/bin/data/packages.txt"
 
+    # Per-package-manager overrides, for cases where either the repo package
+    # name or the installed binary (or both) differ on one specific package
+    # manager — e.g. fd/fd-find/fdfind and bat/bat/batcat on apt. Shared
+    # with install.sh; see bin/data/pkg-overrides.txt for the format.
+    local -A PKG_NAME_PM=() PKG_BIN_PM=()
+    local _oline _ogeneric _orest _opm _orest2
+    while IFS= read -r _oline; do
+        [[ -z "$_oline" || "$_oline" == \#* ]] && continue
+        _ogeneric="${_oline%%:*}"
+        _orest="${_oline#*:}"
+        _opm="${_orest%%:*}"
+        _orest2="${_orest#*:}"
+        [[ "$_opm" != "$PM" ]] && continue
+        PKG_NAME_PM[$_ogeneric]="${_orest2%%:*}"
+        PKG_BIN_PM[$_ogeneric]="${_orest2#*:}"
+    done < "$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+
     local dep
 
     for dep in "${REQUIRED[@]}"; do
-        if has "${PKG_BIN[$dep]:-$dep}"; then
+        if has "${PKG_BIN_PM[$dep]:-${PKG_BIN[$dep]:-$dep}}"; then
             ok "$dep"
         else
             warn "$dep — not found"
-            detail "$(pkg_install_hint "$dep")"
+            detail "$(pkg_install_hint "${PKG_NAME_PM[$dep]:-$dep}")"
             (( ISSUES++ ))
         fi
     done
 
     for dep in "${OPTIONAL[@]}"; do
-        if has "${PKG_BIN[$dep]:-$dep}"; then
+        if has "${PKG_BIN_PM[$dep]:-${PKG_BIN[$dep]:-$dep}}"; then
             ok "$dep (optional)"
         else
             skip "$dep (optional) — not found"
@@ -382,7 +399,7 @@ EOF
     fi
 
     if [[ -f "$HOME/.zshrc" ]]; then
-        if grep -q "lichtar" "$HOME/.zshrc" 2>/dev/null; then
+        if grep -q "LICHTAR_HOME" "$HOME/.zshrc" 2>/dev/null; then
             ok "~/.zshrc sources lichtar"
         else
             warn "~/.zshrc does not appear to source lichtar"

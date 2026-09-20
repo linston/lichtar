@@ -31,27 +31,64 @@ _dir_hist_track() {
 }
 add-zsh-hook chpwd _dir_hist_track
 
+# zle -M message that clears itself after ~1.5s with no extra keypress
+# needed: zle -F wakes zsh's event loop on its own once the background
+# `sleep` exits. Any key pressed before then also clears it immediately,
+# same as any other zle -M message (e.g. the non-ASCII guard's warning).
+#
+# NOTE: zle -M does not render raw ANSI/SGR escapes -- testing confirmed
+# it displays them as literal caret-notation (e.g. "^[[38;2;...m") rather
+# than applying color, so this stays plain text rather than themed.
+_dir_hist_flash_clear() {
+    local fd="$1"
+    zle -F "$fd"
+    exec {fd}<&-
+    zle -M ""
+}
+
+_dir_hist_flash() {
+    zle -M "$1"
+    local fd
+    exec {fd}< <(sleep 1)
+    zle -F "$fd" _dir_hist_flash_clear
+}
+
 _dir_hist_back_widget() {
-    (( _dir_hist_pos > 1 )) || return 0
-    _dir_nav_flag=1
-    if builtin cd -- "${_dir_hist[_dir_hist_pos-1]}" 2>/dev/null; then
-        (( _dir_hist_pos-- ))
-        _force_refresh_ui
-    else
+    local target
+    while (( _dir_hist_pos > 1 )); do
+        target="${_dir_hist[_dir_hist_pos-1]}"
+        _dir_nav_flag=1
+        if builtin cd -- "$target" 2>/dev/null; then
+            (( _dir_hist_pos-- ))
+            _force_refresh_ui
+            return
+        fi
         _dir_nav_flag=0
-    fi
+        # That directory no longer exists (deleted, unmounted, ...) — drop
+        # it from history and try the next one back, instead of getting
+        # stuck silently retrying the same dead path forever.
+        _dir_hist[_dir_hist_pos-1]=()
+        (( _dir_hist_pos-- ))
+    done
+    _dir_hist_flash "No earlier directory in history still exists"
 }
 zle -N _dir_hist_back_widget
 
 _dir_hist_forward_widget() {
-    (( _dir_hist_pos < ${#_dir_hist} )) || return 0
-    _dir_nav_flag=1
-    if builtin cd -- "${_dir_hist[_dir_hist_pos+1]}" 2>/dev/null; then
-        (( _dir_hist_pos++ ))
-        _force_refresh_ui
-    else
+    local target
+    while (( _dir_hist_pos < ${#_dir_hist} )); do
+        target="${_dir_hist[_dir_hist_pos+1]}"
+        _dir_nav_flag=1
+        if builtin cd -- "$target" 2>/dev/null; then
+            (( _dir_hist_pos++ ))
+            _force_refresh_ui
+            return
+        fi
         _dir_nav_flag=0
-    fi
+        # Same as above, but for a dead entry ahead of us.
+        _dir_hist[_dir_hist_pos+1]=()
+    done
+    _dir_hist_flash "No later directory in history still exists"
 }
 zle -N _dir_hist_forward_widget
 
