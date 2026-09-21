@@ -29,8 +29,6 @@ if [[ ! -d "$LICHTAR_HOME" ]]; then
     exit 1
 fi
 
-source "$LICHTAR_HOME/help/lichtar_help.zsh"
-
 case "$1" in
     "")
         _lichtar_usage
@@ -41,6 +39,7 @@ case "$1" in
         echo "lichtar $v"
         ;;  
     help)
+        source "$LICHTAR_HOME/help/lichtar_help.zsh"
         (( $# > 0 )) && shift
         _lichtar_help "$@"
         ;;

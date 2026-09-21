@@ -95,9 +95,6 @@ unset _lf
 _lichtar_load "$LICHTAR_HOME/aliases.zsh"
 _lichtar_load "$LICHTAR_HOME/core/functions.zsh"
 
-# ── Help system ───────────────────────────────────────────────────────────────
-_lichtar_load "$LICHTAR_HOME/help/lichtar_help.zsh"
-
 # ── Hooks ─────────────────────────────────────────────────────────────────────
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec _timer_preexec

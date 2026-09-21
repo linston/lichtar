@@ -56,8 +56,17 @@ _fzf_opts=(
 # option set against 0.44.1, 0.55.0, 0.62.0, 0.68.0 and 0.74.4), so they're
 # only added once we can see the installed fzf is new enough.
 if command -v fzf &>/dev/null; then
-    local _fzf_minor="${$(fzf --version 2>/dev/null)#0.}"
-    _fzf_minor="${${_fzf_minor%%.*}%% *}"
+    local _fzf_cache="$LICHTAR_HOME/cache/fzf_version"
+    local _fzf_minor
+
+    if [[ -f "$_fzf_cache" && ! "$(command -v fzf)" -nt "$_fzf_cache" ]]; then
+        _fzf_minor=$(<"$_fzf_cache")
+    else
+        _fzf_minor="${$(fzf --version 2>/dev/null)#0.}"
+        _fzf_minor="${${_fzf_minor%%.*}%% *}"
+        print -r -- "$_fzf_minor" >| "$_fzf_cache"
+    fi
+
     if (( ${_fzf_minor:-0} >= 68 )); then
         _fzf_opts+=(
             --highlight-line
