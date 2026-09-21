@@ -224,7 +224,24 @@ EOF
                     detail "System detection cache refreshed — restart your shell to apply"
 
                     local changelog_new
-                    changelog_new=$(git -C "$LICHTAR_HOME" diff "$before" "$after" -- CHANGELOG.md 2>/dev/null | grep '^+- ' | sed 's/^+//')
+                    # CHANGELOG entries are release sections, not individual
+                    # diff lines. Extract newly added release sections from
+                    # the update range so upgrades can show every release
+                    # since the version actually installed on the device.
+                    changelog_new=$(git -C "$LICHTAR_HOME" diff --unified=0 "$before" "$after" -- CHANGELOG.md 2>/dev/null |
+                        awk '
+                            /^\\+## \\[v[0-9]/ {
+                                found=1
+                                print substr($0, 2)
+                                next
+                            }
+                            found && /^ ## \\[v[0-9]/ {
+                                exit
+                            }
+                            found && /^\\+/ {
+                                print substr($0, 2)
+                            }
+                        ')
                     [[ -n "$changelog_new" ]] && print_limited_list "What's new:" "$changelog_new"
                 fi
                 unset _syntax_bad _f
