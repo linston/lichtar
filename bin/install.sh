@@ -430,9 +430,13 @@ else
     # so it needs the bare command name, not a full path — a full path
     # here silently fails: chsh still exits 0, but nothing actually changes.
     if [ -n "$TERMUX_VERSION" ]; then
-      chsh -s "$(basename "$ZSH_PATH")" >/dev/null 2>&1
+      # chsh may legitimately fail in CI or restricted environments; the
+      # actual result is checked below, and the fallback handles bash hosts.
+      chsh -s "$(basename "$ZSH_PATH")" >/dev/null 2>&1 || :
     else
-      chsh -s "$ZSH_PATH" >/dev/null 2>&1
+      # chsh may legitimately fail in CI or restricted environments; the
+      # actual result is checked below, and the fallback handles bash hosts.
+      chsh -s "$ZSH_PATH" >/dev/null 2>&1 || :
     fi
     # Don't trust chsh's own exit code — on Termux it reports success even
     # when it silently did nothing, and the same has been observed on a
