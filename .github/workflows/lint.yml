@@ -30,10 +30,13 @@ jobs:
       - name: Syntax-check install.sh (POSIX sh)
         run: sh -n bin/install.sh
 
-      - name: Shellcheck shell scripts
+      - name: Syntax-check Zsh theme files
+        run: zsh -n themes/fzf/catppuccin-mocha.sh
+
+      - name: Shellcheck POSIX shell scripts
         run: |
           command -v shellcheck >/dev/null 2>&1 || sudo apt-get install -y shellcheck
-          find . -name '*.sh' -not -path "*/plugins/*/*" -exec shellcheck -s sh {} +
+          find . -name '*.sh' -not -path "*/plugins/*/*"             -not -path "./themes/fzf/catppuccin-mocha.sh"             -exec shellcheck -s sh {} +
 
       - name: Verify every prompt badge has a visible glyph
         run: python3 dev/check_badges.py
