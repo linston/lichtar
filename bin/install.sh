@@ -452,10 +452,11 @@ else
     elif [ "$changed" = no ] && [ "$current_shell" = "bash" ] && [ -f "$HOME/.bashrc" ]; then
       warn "chsh reported success but didn't actually change anything"
       if ! grep -q 'exec .*zsh' "$HOME/.bashrc" 2>/dev/null; then
+        # shellcheck disable=SC2016 # $ZSH_VERSION must remain literal in the generated .bashrc
         printf '\n# Added by lichtar install.sh: chsh did not take effect on this system\nif [ -z "$ZSH_VERSION" ]; then\n  exec "%s"\nfi\n' "$ZSH_PATH" >>"$HOME/.bashrc"
         ok "Added a fallback to ~/.bashrc — zsh will start automatically from your next bash session"
       else
-        info "~/.bashrc already execs into zsh — should already be working; check it manually"
+        info "$HOME/.bashrc already execs into zsh — should already be working; check it manually"
       fi
     else
       warn "chsh may not have worked — switch manually: chsh -s $ZSH_PATH"
