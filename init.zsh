@@ -100,3 +100,8 @@ autoload -Uz add-zsh-hook
 add-zsh-hook preexec _timer_preexec
 add-zsh-hook preexec _lichtar_freq_log
 add-zsh-hook precmd _assemble_prompt
+
+# ── Post-update migrations ────────────────────────────────────────────────────
+# Normally this is one file-existence check; migration work runs only after
+# lichtar has successfully updated itself.
+_lichtar_load "$LICHTAR_HOME/core/migrations.zsh"

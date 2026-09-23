@@ -20,6 +20,7 @@ _lichtar_update() {
     local NO_SPINNER=0
     local FORCE_LOG=0
     local MAX_LIST=15
+    local SELF_UPDATED=0
 
     local LOG_DIR="$LICHTAR_HOME/cache"
     local LOG_FILE="$LOG_DIR/update.log"
@@ -224,7 +225,16 @@ EOF
                 else
                     source "$LICHTAR_HOME/bin/system_detect.zsh"
                     detect_system
-                    detail "System detection cache refreshed — restart your shell to apply"
+                    detail "System detection cache refreshed"
+                    SELF_UPDATED=1
+
+                    # The new shell must run migration checks from the new
+                    # checkout, not from the old update process.
+                    if (( DRYRUN == 0 )); then
+                        local pending_tmp="$LOG_DIR/update-pending.tmp"
+                        printf 'after=%s\\n' "$after" > "$pending_tmp" &&
+                            mv -f "$pending_tmp" "$LOG_DIR/update-pending"
+                    fi
 
                     local changelog_new
                     # Show every CHANGELOG line added between the revision

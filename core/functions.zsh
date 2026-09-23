@@ -40,3 +40,18 @@ md() {
         ${PAGER:-less} "$file"
     fi
 }
+
+
+# ── CLI wrapper ────────────────────────────────────────────────────────────────
+# Keep interactive `lichtar update` in the current shell so a successful
+# self-update can replace this shell with the new lichtar version.
+lichtar() {
+    if [[ "${1:-}" == "update" ]]; then
+        shift
+        LICHTAR_UPDATE_IN_SHELL=1
+        source "$LICHTAR_HOME/bin/lichtar_update.zsh"
+        _lichtar_update "$@"
+    else
+        "$LICHTAR_HOME/bin/lichtar" "$@"
+    fi
+}
