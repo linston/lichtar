@@ -356,6 +356,13 @@ EOF
 
     printf "  ${KEY}${B}✨ Done${NC}  ${TXM}· %ss${NC}\n\n" "$elapsed"
 
+    if (( SELF_UPDATED == 1 &&
+          ${#FAILED[@]} == 0 &&
+          ${LICHTAR_UPDATE_IN_SHELL:-0} == 1 )); then
+        _cleanup
+        exec zsh
+    fi
+
     (( ${#FAILED[@]} > 0 )) && return 1
     return 0
 }
