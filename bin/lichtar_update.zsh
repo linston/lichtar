@@ -20,7 +20,6 @@ _lichtar_update() {
     local NO_SPINNER=0
     local FORCE_LOG=0
     local MAX_LIST=15
-    local SELF_UPDATED=0
 
     local LOG_DIR="$LICHTAR_HOME/cache"
     local LOG_FILE="$LOG_DIR/update.log"
@@ -226,8 +225,6 @@ EOF
                     source "$LICHTAR_HOME/bin/system_detect.zsh"
                     detect_system
                     detail "System detection cache refreshed"
-                    SELF_UPDATED=1
-
                     # The new shell must run migration checks from the new
                     # checkout, not from the old update process.
                     if (( DRYRUN == 0 )); then
@@ -356,12 +353,6 @@ EOF
 
     printf "  ${KEY}${B}✨ Done${NC}  ${TXM}· %ss${NC}\n\n" "$elapsed"
 
-    if (( SELF_UPDATED == 1 &&
-          ${#FAILED[@]} == 0 &&
-          ${LICHTAR_UPDATE_IN_SHELL:-0} == 1 )); then
-        _cleanup
-        exec zsh
-    fi
 
     (( ${#FAILED[@]} > 0 )) && return 1
     return 0

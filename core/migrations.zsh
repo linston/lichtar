@@ -11,8 +11,15 @@ _lichtar_migrations() {
     local pending_file="$LICHTAR_HOME/cache/update-pending"
     [[ -f "$pending_file" ]] || return 0
 
-    # Consume the marker after the new shell has loaded. Real state migrations
-    # will be added here without turning init.zsh into a migration engine.
+    local after
+    after=$(sed -n 's/^after=//p' "$pending_file" | head -n1)
+
+    printf "\n  ✨ Lichtar updated"
+    [[ -n "$after" ]] && printf " → %s" "$after"
+    printf "\n     New configuration is active in this shell.\n\n"
+
+    # Consume the marker after the notification. Real state migrations can be
+    # added here without turning init.zsh into a migration engine.
     rm -f "$pending_file"
 }
 
