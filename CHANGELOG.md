@@ -11,7 +11,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
-- `lichtar update` no longer discards local changes in the tracked Yazi package and flavor files; self-update is skipped until those changes are handled explicitly.
+- `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
 
 ### Performance
 
