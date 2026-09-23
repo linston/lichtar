@@ -253,7 +253,6 @@ EOF
             warn "lichtar self-update failed (local changes or diverged history?)"
             FAILED+=("lichtar (self)")
         fi
-        fi
     else
         skip "Not a git checkout — skipping self-update"
         detail "Only works if ~/.lichtar was cloned directly (see: lichtar help install)"
