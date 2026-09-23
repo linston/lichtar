@@ -11,6 +11,10 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- Test entry: verify changelog display for unreleased updates.
+
+### Fixed
+
 - `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
 
 ### Performance
