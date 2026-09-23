@@ -177,33 +177,19 @@ EOF
     if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
 
-        # Yazi's package manager may modify these tracked files at runtime.
-        # Never discard those local changes automatically: doing so would make
-        # `lichtar update` destructive. A dirty Yazi state blocks only the
-        # self-update; the files remain untouched for the user to inspect,
-        # commit, stash, or revert explicitly.
+        # Yazi's package manager modifies these tracked files at runtime.
+        # They are managed package state, not user configuration. Restore only
+        # these two files before self-update so runtime changes from `ya pkg
+        # upgrade` cannot block the next fast-forward update.
         local -a YAZI_STATE_FILES=(
             yazi/package.toml
             yazi/flavors/catppuccin-mocha.yazi/flavor.toml
         )
-        local -a YAZI_DIRTY_FILES=()
-        local _yazi_file
 
-        for _yazi_file in "${YAZI_STATE_FILES[@]}"; do
-            if ! git -C "$LICHTAR_HOME" diff --quiet -- "$_yazi_file" 2>/dev/null ||
-               ! git -C "$LICHTAR_HOME" diff --cached --quiet -- "$_yazi_file" 2>/dev/null; then
-                YAZI_DIRTY_FILES+=("$_yazi_file")
-            fi
-        done
+        if (( DRYRUN == 0 )); then
+            git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
+        fi
 
-        if (( ${#YAZI_DIRTY_FILES[@]} > 0 )); then
-            warn "Yazi configuration has local changes — self-update skipped"
-            for _yazi_file in "${YAZI_DIRTY_FILES[@]}"; do
-                detail "$_yazi_file"
-            done
-            detail "Commit, stash, or revert these changes, then run lichtar update again."
-            FAILED+=("lichtar (self) — local Yazi changes")
-        else
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
             after=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
