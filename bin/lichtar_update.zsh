@@ -177,16 +177,33 @@ EOF
     if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
 
-        # Yazi package manager modifies tracked package state.
-        # These runtime changes must not block the lichtar self-update;
-        # `ya pkg upgrade` runs later in this update.
+        # Yazi's package manager may modify these tracked files at runtime.
+        # Never discard those local changes automatically: doing so would make
+        # `lichtar update` destructive. A dirty Yazi state blocks only the
+        # self-update; the files remain untouched for the user to inspect,
+        # commit, stash, or revert explicitly.
         local -a YAZI_STATE_FILES=(
             yazi/package.toml
             yazi/flavors/catppuccin-mocha.yazi/flavor.toml
         )
+        local -a YAZI_DIRTY_FILES=()
+        local _yazi_file
 
-        git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
+        for _yazi_file in "${YAZI_STATE_FILES[@]}"; do
+            if ! git -C "$LICHTAR_HOME" diff --quiet -- "$_yazi_file" 2>/dev/null ||
+               ! git -C "$LICHTAR_HOME" diff --cached --quiet -- "$_yazi_file" 2>/dev/null; then
+                YAZI_DIRTY_FILES+=("$_yazi_file")
+            fi
+        done
 
+        if (( ${#YAZI_DIRTY_FILES[@]} > 0 )); then
+            warn "Yazi configuration has local changes — self-update skipped"
+            for _yazi_file in "${YAZI_DIRTY_FILES[@]}"; do
+                detail "$_yazi_file"
+            done
+            detail "Commit, stash, or revert these changes, then run lichtar update again."
+            FAILED+=("lichtar (self) — local Yazi changes")
+        else
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
             after=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
@@ -249,6 +266,7 @@ EOF
         else
             warn "lichtar self-update failed (local changes or diverged history?)"
             FAILED+=("lichtar (self)")
+        fi
         fi
     else
         skip "Not a git checkout — skipping self-update"

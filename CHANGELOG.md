@@ -9,6 +9,10 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+### Fixed
+
+- `lichtar update` no longer discards local changes in the tracked Yazi package and flavor files; self-update is skipped until those changes are handled explicitly.
+
 ### Performance
 
 - Significantly reduced interactive shell startup time through targeted startup optimizations.
