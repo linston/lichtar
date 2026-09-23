@@ -12,6 +12,7 @@ this file records _what_ changed, tags record _which commit_.
 ### Fixed
 
 - Test entry: verify changelog display for unreleased updates.
+- Test entry: verify automatic interactive shell restart after self-update.
 
 ### Fixed
 
@@ -99,8 +100,6 @@ this file records _what_ changed, tags record _which commit_.
 - `md` function — view any markdown file through `glow`, themed to
   match lichtar's Catppuccin Mocha (falls back to `$PAGER`/`less` if
   `glow` isn't installed).
-- `lichtar changelog` now renders through `glow` + the same theme
-  instead of plain-text `less`.
 - Vendored Catppuccin's official Glamour style
   (`themes/glow/catppuccin-mocha.json`, MIT, from catppuccin/glamour).
 
@@ -127,19 +126,13 @@ this file records _what_ changed, tags record _which commit_.
   again explicitly in `plugins/load.zsh`. Removed the redundant second
   call.
 - `ssh-agent` is now reused across terminal sessions via a pidfile
-  (`cache/ssh-agent.env`) instead of spawning a new agent process on
-  every shell start — previously every new terminal leaked one.
-- `fast-theme` (fast-syntax-highlighting) was re-applying itself on
-  every single shell start instead of only when the theme actually
-  changed. Its cache fingerprint depended on `stat -c %Y` / `stat -f %m`
-  — neither of which exist on Termux's `stat` — so the mtime component
-  was always empty and the fingerprint never matched. Replaced with
-  zsh's builtin `zstat` (already used the same way elsewhere in the
-  codebase), which doesn't depend on any external `stat` binary's flag
-  dialect.
-- `dev/preflight.sh` now syntax-checks `.zsh` files safely even if paths
-  contain whitespace, and CI/local preflight now run blocking ShellCheck
-  over every `.sh` script instead of only advisory-checking `install.sh`.
+  (`cache/ssh-agent.env`) instead of spawning a new agent process on every shell start — previously every new terminal leaked one.
+- `fast-theme` (fast-syntax-highlighting) was re-applying itself on every
+  single shell start instead of only when the theme actually changed. Its
+  cache fingerprint depended on `stat -c %Y` / `stat -f %m`
+  — neither of which exist on Termux's `stat` — so the mtime component was
+  always empty and the fingerprint never matched. Replaced with zsh's builtin `zstat` (already used the same way elsewhere in the codebase), which doesn't depend on any external `stat` binary's flag dialect.
+- `dev/preflight.sh` now syntax-checks `.zsh` files safely even if paths contain whitespace, and CI/local preflight now run blocking ShellCheck over every `.sh` script instead of only advisory-checking `install.sh`.
 
 ---
 
@@ -160,7 +153,6 @@ this file records _what_ changed, tags record _which commit_.
 - CI: syntax-check, install smoke test, and prompt-badge glyph check on
   every push/PR.
 - README screenshots.
-- `LICENSE` (MIT).
 
 ### Fixed
 
@@ -169,14 +161,12 @@ this file records _what_ changed, tags record _which commit_.
   `neovim` as required).
 - `less` is now a documented required dependency — `lichtar help` silently
   depended on it.
-- `lichtar doctor` no longer defaults the package manager to Termux's
-  `pkg` when the system-detection cache hasn't been generated yet.
+- `lichtar doctor` no longer defaults the package manager to Termux's `pkg`
+  when the system-detection cache hasn't been generated yet.
 - `autopair-init` is no longer called unconditionally — guarded by a
   function-existence check.
-- Root badge (`EUID -eq 0`) now renders its lock icon instead of an
-  empty colored space.
-- Removed the proot-specific badge override that hardcoded the Ubuntu
-  icon/color regardless of the actually detected distro.
+- Root badge (EUID -eq 0) now renders its lock icon instead of an empty colored space.
+- Removed the proot-specific badge override that hardcoded the Ubuntu icon/color regardless of the actually detected distro.
 - Removed references to a non-existent `update_all` command from
   `lichtar update`'s help text and comments.
 - `install.sh -y` no longer silently overwrites an existing, unrelated
@@ -184,12 +174,8 @@ this file records _what_ changed, tags record _which commit_.
 - `yazi` update step relabeled from "plugins" to "packages" — it already
   updated the Catppuccin flavor too via `ya pkg upgrade`, the label just
   undersold it.
-- `install.sh`: two minor shellcheck findings (unsafe `&&`/`||` pseudo
-  if-else on the font download; missing `disable` comment on an
-  intentional unquoted expansion).
-- README's optional prerequisites list was missing `neovim`, even though
-  `install.sh`, `lichtar doctor`, and `lichtar help install` all
-  correctly listed it.
+- `install.sh`: two minor shellcheck findings (unsafe `&&`/`||` pseudo if-else on the font download; missing `disable` comment on an intentional unquoted expansion).
+- README's optional prerequisites list was missing `neovim`, even though `install.sh`, `lichtar doctor`, and `lichtar help install` all correctly listed them.
 
 ### Removed
 
