@@ -110,16 +110,14 @@ EOF
               (( i = i % ${#_FRAMES[@]} + 1 ))
               sleep 0.08
           done
-        ) &
+        ) &!
         _SPIN_PID=$!
-        disown "$_SPIN_PID" 2>/dev/null
     }
     spinner_stop() {
         (( NO_SPINNER == 1 )) && return 0
         [[ ! -t 1 ]] && return 0
         if [[ -n "$_SPIN_PID" ]]; then
             kill "$_SPIN_PID" 2>/dev/null
-            wait "$_SPIN_PID" 2>/dev/null
             _SPIN_PID=""
         fi
         printf "\r\033[K"
@@ -177,15 +175,18 @@ EOF
     if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
 
-        # Yazi package manager modifies tracked package state.
-        # These runtime changes must not block the lichtar self-update;
-        # `ya pkg upgrade` runs later in this update.
+        # Yazi's package manager modifies these tracked files at runtime.
+        # They are managed package state, not user configuration. Restore only
+        # these two files before self-update so runtime changes from `ya pkg
+        # upgrade` cannot block the next fast-forward update.
         local -a YAZI_STATE_FILES=(
             yazi/package.toml
             yazi/flavors/catppuccin-mocha.yazi/flavor.toml
         )
 
-        git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
+        if (( DRYRUN == 0 )); then
+            git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
+        fi
 
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
@@ -221,28 +222,7 @@ EOF
                 else
                     source "$LICHTAR_HOME/bin/system_detect.zsh"
                     detect_system
-                    detail "System detection cache refreshed — restart your shell to apply"
-
-                    local changelog_new
-                    # CHANGELOG entries are release sections, not individual
-                    # diff lines. Extract newly added release sections from
-                    # the update range so upgrades can show every release
-                    # since the version actually installed on the device.
-                    changelog_new=$(git -C "$LICHTAR_HOME" diff --unified=0 "$before" "$after" -- CHANGELOG.md 2>/dev/null |
-                        awk '
-                            /^\\+## \\[v[0-9]/ {
-                                found=1
-                                print substr($0, 2)
-                                next
-                            }
-                            found && /^ ## \\[v[0-9]/ {
-                                exit
-                            }
-                            found && /^\\+/ {
-                                print substr($0, 2)
-                            }
-                        ')
-                    [[ -n "$changelog_new" ]] && print_limited_list "What's new:" "$changelog_new"
+                    detail "System detection cache refreshed"
                 fi
                 unset _syntax_bad _f
             fi

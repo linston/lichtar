@@ -90,8 +90,3 @@ unsetopt transient_rprompt
 
 # Put RPROMPT flush against the right edge.
 ZLE_RPROMPT_INDENT=0
-
-# Re-render only the currently active prompt after terminal resize.
-TRAPWINCH() {
-    [[ -o zle ]] && zle reset-prompt
-}

@@ -28,9 +28,12 @@ fi
 echo "== install.sh (POSIX sh) =="
 sh -n bin/install.sh || status=1
 
+echo "== zsh theme files (not POSIX sh, despite the .sh extension) =="
+zsh -n themes/fzf/catppuccin-mocha.sh || status=1
+
 echo "== shellcheck =="
 if command -v shellcheck >/dev/null 2>&1; then
-  find . -name '*.sh' -not -path "*/plugins/*/*" -exec shellcheck -s sh {} + || status=1
+  find . -name '*.sh' -not -path "*/plugins/*/*" -not -path "./themes/fzf/catppuccin-mocha.sh" -exec shellcheck -s sh {} + || status=1
 else
   echo "shellcheck not installed locally — CI will still run it"
 fi
