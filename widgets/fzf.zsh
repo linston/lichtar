@@ -29,7 +29,7 @@ __fzf_cd_widget() {
 
     builtin cd -- "$dir" || return 0
     BUFFER=""
-    zle reset-prompt
+    _force_refresh_ui
 }
 
 zle -N __fzf_cd_widget

@@ -12,6 +12,7 @@ this file records _what_ changed, tags record _which commit_.
 ### Fixed
 
 - `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
+- `Ctrl+F` and `Alt+C` now enter the selected directory immediately after choosing it with fzf.
 
 ### Performance
 
