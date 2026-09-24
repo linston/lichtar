@@ -778,7 +778,7 @@ _lichtar_help_render() {
         _SS "Troubleshooting"
         _R "Anything missing/broken" "lichtar doctor  — checks everything, suggests fixes"
         _R "Wrong distro/icon detected" "lichtar system --force  — re-run detection"
-        _R "Plugin errors"          "re-run install.sh — it skips what's already cloned"
+        _R "Plugin errors"          "re-run install.sh — it skips what's already cloned and returns an error if a plugin still cannot be installed"
         _R "Completion broken"     "rm ~/.lichtar/cache/zcompdump* && exec zsh"
         _BR
         ;;

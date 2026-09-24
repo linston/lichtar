@@ -307,9 +307,11 @@ clone_plugin() {
     ok "$plugin_name"
   else
     warn "$plugin_name — clone failed (check network / URL)"
+    PLUGIN_ERRORS=1
   fi
 }
 
+PLUGIN_ERRORS=0
 clone_plugin "https://github.com/zsh-users/zsh-autosuggestions" "zsh-autosuggestions"
 clone_plugin "https://github.com/zsh-users/zsh-history-substring-search" "zsh-history-substring-search"
 clone_plugin "https://github.com/Aloxaf/fzf-tab" "fzf-tab"
@@ -490,6 +492,12 @@ fi
 # Done
 # =============================================================================
 printf "\n  %s%s─────────────────────────────────────%s\n" "$C_INFO" "$C_B" "$C_NC"
+if [ "$PLUGIN_ERRORS" -ne 0 ]; then
+  warn "Installation completed with errors"
+  info "Re-run install.sh after fixing the plugin installation problem"
+  exit 1
+fi
+
 ok "Installation complete"
 if [ -n "$TERMUX_VERSION" ]; then
   info "Restart Termux, or run: exec zsh"
