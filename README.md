@@ -73,8 +73,8 @@ git clone https://github.com/linston/lichtar ~/.lichtar
 ```
 
 Re-running `install.sh` any time is safe — it only fills in what's
-missing (plugins, `.zshrc`, font, default shell). Nothing already in
-place is overwritten without asking first.
+missing (plugins, `.env`, `.zshrc`, font, default shell). Nothing already
+in place is overwritten without asking first.
 
 Add `-y` to skip prompts (the `.zshrc` overwrite prompt is never
 skipped, even with `-y`):
@@ -87,13 +87,12 @@ Then restart your terminal, or run `exec zsh`.
 
 ## Configuration
 
-```sh
-cp ~/.lichtar/.env.example ~/.lichtar/.env
-```
+`install.sh` automatically creates `~/.lichtar/.env` from `.env.example`
+if `.env` does not already exist.
 
-Edit `~/.lichtar/.env` — it's your personal config, gitignored, never
-touched by `install.sh` or `lichtar update`. See it or
-`lichtar help config` for all available flags.
+Edit `~/.lichtar/.env` — it's your personal config, gitignored, and never
+overwritten by `install.sh` or `lichtar update`. See `lichtar help config`
+for all available flags.
 
 ## Updating
 

@@ -7,8 +7,9 @@
 #   ~/.lichtar/bin/install.sh
 #
 # Safe to re-run any time — it only fills in what's missing (packages
-# check, plugin clones, .zshrc, font, default shell). Nothing is ever
-# copied, overwritten without asking, or deleted from ~/.lichtar.
+# check, plugin clones, .env, .zshrc, font, default shell). Existing
+# configuration is never overwritten without asking, and nothing is
+# deleted from ~/.lichtar.
 #
 # POSIX sh — no bashisms, must run under Termux's /bin/sh too.
 # =============================================================================
@@ -202,9 +203,9 @@ BIN_DIR=$(cd "$(dirname "$0")" && pwd)
 LICHTAR_HOME=$(cd "$BIN_DIR/.." && pwd)
 TARGET_LICHTAR="$HOME/.lichtar"
 
-printf "\n  %s%s╔═══════════════════════════════════╗%s\n" "$C_INFO" "$C_B" "$C_NC"
-printf "  %s%s║         LICHTAR  INSTALL           ║%s\n" "$C_INFO" "$C_B" "$C_NC"
-printf "  %s%s╚═══════════════════════════════════╝%s\n" "$C_INFO" "$C_B" "$C_NC"
+printf "\n"
+printf "  %s%s          LICHTAR  INSTALL            %s\n" "$C_INFO" "$C_B" "$C_NC"
+printf "  %s%s─────────────────────────────────────%s\n" "$C_INFO" "$C_B" "$C_NC"
 
 # =============================================================================
 # 0. Pre-flight checks
@@ -325,7 +326,24 @@ chmod +x "$LICHTAR_HOME/bin/lichtar" 2>/dev/null || true
 ok "Verified $HOME/.lichtar/cache"
 
 # =============================================================================
-# 4. .zshrc
+# 4. Local configuration
+# =============================================================================
+section "Local configuration"
+
+if [ -f "$LICHTAR_HOME/.env" ]; then
+  info "$HOME/.lichtar/.env already exists — leaving it as-is"
+elif [ -e "$LICHTAR_HOME/.env" ]; then
+  warn "$HOME/.lichtar/.env exists but is not a regular file — aborting"
+  exit 1
+elif [ -f "$LICHTAR_HOME/.env.example" ]; then
+  cp "$LICHTAR_HOME/.env.example" "$LICHTAR_HOME/.env"
+  ok "Created $HOME/.lichtar/.env from .env.example"
+else
+  warn "$HOME/.lichtar/.env.example is missing — skipped local configuration"
+fi
+
+# =============================================================================
+# 5. .zshrc
 # =============================================================================
 section "Configuring $HOME/.zshrc"
 
@@ -355,7 +373,7 @@ else
 fi
 
 # =============================================================================
-# 5. Nerd Font
+# 6. Nerd Font
 # =============================================================================
 section "Nerd Font"
 
@@ -393,7 +411,7 @@ else
 fi
 
 # =============================================================================
-# 6. Default shell
+# 7. Default shell
 # =============================================================================
 section "Default shell"
 
