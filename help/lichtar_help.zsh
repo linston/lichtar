@@ -726,7 +726,7 @@ _lichtar_help_render() {
         _R "2. Zsh plugins"   "git-clones the 5 plugins into ~/.lichtar/plugins/"
         _R "3. Directories"   "verifies ~/.lichtar/cache exists"
         _R "4. Local config"   "creates ~/.lichtar/.env from .env.example if missing"
-        _R "5. .zshrc"         "installs it, or backs up + replaces an existing one"
+        _R "5. .zshrc"         "installs it, or backs up + appends the loader to an existing one"
         _R "6. Nerd Font"      "downloads JetBrainsMono NF on Termux; on Linux it points"
         _N "you to install one system-wide and set it in your terminal emulator"
         _R "7. Default shell"  "offers to chsh -s to zsh if it isn't already"
