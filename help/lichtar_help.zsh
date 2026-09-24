@@ -714,8 +714,8 @@ _lichtar_help_render() {
         _BR
 
         _SS "Safe to re-run any time"
-        _B "install.sh only fills in what's missing. It never copies over, deletes,"
-        _B "or silently overwrites anything already in ~/.lichtar."
+        _B "install.sh only fills in what's missing. Existing configuration is never"
+        _B "overwritten without asking, and nothing is deleted from ~/.lichtar."
         _X "~/.lichtar/bin/install.sh"
         _BR
 
@@ -725,10 +725,11 @@ _lichtar_help_render() {
         _N "anything itself or calls sudo. You run the printed command yourself."
         _R "2. Zsh plugins"   "git-clones the 5 plugins into ~/.lichtar/plugins/"
         _R "3. Directories"   "verifies ~/.lichtar/cache exists"
-        _R "4. .zshrc"        "installs it, or backs up + replaces an existing one"
-        _R "5. Nerd Font"     "downloads JetBrainsMono NF on Termux; on Linux it points"
+        _R "4. Local config"   "creates ~/.lichtar/.env from .env.example if missing"
+        _R "5. .zshrc"         "installs it, or backs up + replaces an existing one"
+        _R "6. Nerd Font"      "downloads JetBrainsMono NF on Termux; on Linux it points"
         _N "you to install one system-wide and set it in your terminal emulator"
-        _R "6. Default shell" "offers to chsh -s to zsh if it isn't already"
+        _R "7. Default shell"  "offers to chsh -s to zsh if it isn't already"
         _BR
 
         _SS "Uninstalling"

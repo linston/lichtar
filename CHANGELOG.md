@@ -9,6 +9,10 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+### Added
+
+- `install.sh` now creates `~/.lichtar/.env` from `.env.example` when no local configuration exists, while preserving existing configuration.
+
 ### Fixed
 
 - `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
