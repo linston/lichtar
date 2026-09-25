@@ -15,6 +15,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- `install.sh` now detects its own `.bashrc` zsh fallback reliably instead of matching unrelated `exec ... zsh` text.
 - `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
 - `Ctrl+F` and `Alt+C` now enter the selected directory immediately after choosing it with fzf.
 - `install.sh` now reports plugin installation failures correctly and exits with a non-zero status.
