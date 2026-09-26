@@ -426,7 +426,10 @@ verify_shell_changed() {
       echo no
     fi
   elif command -v getent >/dev/null 2>&1; then
-    if [ "$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)" = "$1" ]; then
+    actual=$(getent passwd "$(id -un)" 2>/dev/null | cut -d: -f7)
+    actual=$(readlink -f "$actual" 2>/dev/null) || :
+    expected=$(readlink -f "$1" 2>/dev/null) || :
+    if [ -n "$actual" ] && [ -n "$expected" ] && [ "$actual" = "$expected" ]; then
       echo yes
     else
       echo no
