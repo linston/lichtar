@@ -439,14 +439,22 @@ verify_shell_changed() {
   fi
 }
 
+ZSH_PATH=$(command -v zsh 2>/dev/null || :)
 current_shell=$(basename "${SHELL:-unknown}")
-if [ "$current_shell" = "zsh" ]; then
+shell_state=no
+
+if [ -n "$ZSH_PATH" ]; then
+  shell_state=$(verify_shell_changed "$ZSH_PATH")
+fi
+
+if [ "$shell_state" = yes ] || {
+  [ "$shell_state" = unknown ] && [ "$current_shell" = zsh ]
+}; then
   ok "zsh is already the default shell"
-elif ! command -v zsh >/dev/null 2>&1; then
+elif [ -z "$ZSH_PATH" ]; then
   warn "zsh is not installed yet — install it first (see Packages step above)"
   info "Then run: chsh -s \$(command -v zsh)"
 else
-  ZSH_PATH=$(command -v zsh)
   warn "Current default shell is: $current_shell"
   if confirm "Switch default shell to zsh now? (chsh -s $ZSH_PATH)"; then
     # Termux's own chsh prepends $PREFIX/bin/ to whatever name you give it,
