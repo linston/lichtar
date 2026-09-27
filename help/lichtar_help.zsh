@@ -791,7 +791,7 @@ _lichtar_help_render() {
 
         _SS "lichtar CLI commands"
         _R "lichtar doctor"          "full environment check — deps, versions, font, suggests fixes"
-        _R "lichtar update"          "self-update + plugins + yazi packages"
+        _R "lichtar update"          "self-update + Zsh plugins + Yazi + Micro plugins"
         _R "lichtar system"          "shows cached platform/distro/package-manager/icon info"
         _R "lichtar system --force"  "re-runs detection and overwrites the cache"
         _R "lichtar changelog"       "what changed, rendered via glow (falls back to less)"
@@ -806,6 +806,7 @@ _lichtar_help_render() {
         _N "Succeeds → the repository is updated."
         _R "2. Zsh plugins"     "git pull --ff-only in each plugins/*/ directory"
         _R "3. Yazi packages"   "ya pkg upgrade — plugins AND the Catppuccin flavor together"
+        _R "4. Micro plugins"   "micro -plugin update — updates installed Micro plugins"
         _N "Manual plugin equivalent:  for d in ~/.lichtar/plugins/*/; do git -C \"\$d\" pull --ff-only; done"
         _BR
 
@@ -907,7 +908,7 @@ _lichtar_help_render() {
         _R "zrc"                  "edit + safe reload ~/.zshrc"
         _R "exec zsh"             "full restart — clears all caches"
         _R "lichtar doctor"       "environment check — deps, versions, font"
-        _R "lichtar update"       "self-update + plugins + yazi packages"
+        _R "lichtar update"       "self-update + Zsh plugins + Yazi + Micro plugins"
         _R "lichtar system"       "show platform/distro/package-manager info"
         _R "lichtar changelog"    "what changed, rendered via glow"
         _R "lichtar help <topic>" "detailed help"

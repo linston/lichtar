@@ -24,7 +24,8 @@ completely — see [Uninstalling](#uninstalling).
 - Catppuccin Mocha theme across zsh, `bat`, `eza`, `fzf`,
   fast-syntax-highlighting, and yazi — one theme file drives all of them
 - `lichtar doctor` — full environment check with platform-correct fix
-  suggestions; `lichtar update` — updates itself and all plugins
+  suggestions; `lichtar update` — updates itself, Zsh plugins, Yazi packages,
+  and installed Micro plugins
 
 Run `lichtar help` after installing for the full reference.
 
@@ -101,7 +102,7 @@ lichtar update
 ```
 
 Pulls the latest lichtar itself (since `~/.lichtar` is a real git
-checkout) and updates all zsh plugins in one go.
+checkout) and updates all Zsh plugins, Yazi packages, and installed Micro plugins.
 
 ## Checking your setup
 

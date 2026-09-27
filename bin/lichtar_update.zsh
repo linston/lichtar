@@ -4,6 +4,7 @@
 #   1. lichtar itself        (git pull --ff-only)
 #   2. zsh plugins           (~/.lichtar/plugins/*)
 #   3. yazi packages         (plugins + flavor, via ya pkg upgrade)
+#   4. micro plugins         (via micro -plugin update)
 #
 # System-wide packages (pkg/npm/pip/nvim) are NOT handled here — update
 # those yourself with your system's package manager.
@@ -38,7 +39,8 @@ _lichtar_update() {
                 cat <<EOF
 Usage: lichtar update [options]
 
-Updates lichtar-owned components: self, zsh plugins, yazi packages (plugins + flavor).
+Updates lichtar-owned components: self, zsh plugins, yazi packages (plugins + flavor),
+and Micro plugins.
 System packages (pkg/npm/pip/nvim) are not handled here — update those
 yourself with your system's package manager.
 
@@ -309,6 +311,28 @@ EOF
         fi
     else
         skip "yazi (ya) not found"
+    fi
+
+    # =========================================================================
+    # 4. Micro plugins
+    # =========================================================================
+    section "${ACC}${B}󰘛${NC}  Micro Plugins"
+
+    if has micro; then
+        if run "Updating micro plugins…" micro -plugin update; then
+            if (( DRYRUN == 1 )); then
+                skip "Dry-run only"
+            elif echo "$RUN_OUT" | grep -qi "Nothing to install / update"; then
+                skip "Nothing to update"
+            else
+                ok "Micro plugins updated"
+            fi
+        else
+            warn "Micro plugin update failed"
+            FAILED+=("Micro plugins")
+        fi
+    else
+        skip "micro not found"
     fi
 
     # =========================================================================
