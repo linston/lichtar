@@ -176,6 +176,7 @@ resolve_pkg_bin() {
       return 0
     fi
   done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+  return 1
 }
 
 pm_install_cmd() {
@@ -232,6 +233,7 @@ PM=$(detect_pkg_manager) || PM=""
 SUDO_PREFIX=""
 [ -n "$PM" ] && [ "$PM" != "pkg" ] && [ "$PM" != "nix" ] && [ "$(id -u)" -ne 0 ] && SUDO_PREFIX="sudo "
 
+missing_required=""
 missing_optional=""
 pkgdata="$LICHTAR_HOME/bin/data/packages.txt"
 while IFS= read -r line; do

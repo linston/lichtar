@@ -15,6 +15,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- `install.sh` now uses explicit package-state initialization and package-resolution status handling.
 - `install.sh` now checks the actual login shell before offering to change it, avoiding unnecessary `chsh` prompts when `$SHELL` is unset or stale.
 
 - `install.sh` now compares canonical shell paths on Linux, avoiding false failures when `command -v` and the login-shell entry use different symlink paths.
