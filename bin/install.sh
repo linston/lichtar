@@ -176,7 +176,6 @@ resolve_pkg_bin() {
       return 0
     fi
   done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
-  return 1
 }
 
 pm_install_cmd() {
