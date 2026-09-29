@@ -605,6 +605,9 @@ _lichtar_help_render() {
         _R "LICHTAR_LANG_DETECT" "1 = enable language version detection"
         _R "LICHTAR_DEBUG"       "1 = verbose module loading"
         _R "LICHTAR_PROFILE"     "1 = show startup timing per module"
+        _N "When .env.example gains a new option, 'lichtar update' and 'lichtar doctor'"
+        _N "show it as missing without modifying your .env. 'lichtar doctor' also reports"
+        _N "options that are no longer present in .env.example."
         _N "'v' always opens Neovim regardless of \$EDITOR — it's a separate alias."
         _BR
 

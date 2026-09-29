@@ -15,6 +15,14 @@ skip()    { printf "  ${TXM}◦${NC}  ${TXM}%s${NC}\n" "$1"; }
 warn()    { printf "  ${WRN}✘${NC}  ${TXT}%s${NC}\n" "$1"; }
 detail()  { printf "     ${TXM}↳ %s${NC}\n" "$1"; }
 
+_lichtar_config_vars() {
+    grep -oE '^LICHTAR_[A-Z_]+' "$1" 2>/dev/null | sort -u
+}
+
+_lichtar_config_line() {
+    grep -E "^${1}=" "$2" 2>/dev/null | head -n1
+}
+
 _hex2a() {
     local hex="${1#\#}"
     local r=$((16#${hex:0:2})) g=$((16#${hex:2:2})) b=$((16#${hex:4:2}))
@@ -33,6 +41,6 @@ _hex2a() {
 #   trap 'my_cleanup' EXIT INT TERM
 #   my_cleanup() { _lichtar_cli_cleanup my_extra_fn another_fn my_cleanup; }
 _lichtar_cli_cleanup() {
-    unfunction has section ok skip warn detail _hex2a _lichtar_cli_cleanup \
+    unfunction has section ok skip warn detail _hex2a _lichtar_config_vars _lichtar_config_line _lichtar_cli_cleanup \
         "$@" 2>/dev/null
 }

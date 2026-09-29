@@ -11,6 +11,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Added
 
+- `lichtar update` and `lichtar doctor` now detect configuration options missing from `.env`; `doctor` also reports unrecognized options.
 - `lichtar update` now updates installed Micro plugins via Micro's native plugin manager.
 - `install.sh` now creates `~/.lichtar/.env` from `.env.example` when no local configuration exists, while preserving existing configuration.
 

@@ -21,6 +21,7 @@ _lichtar_update() {
     local NO_SPINNER=0
     local FORCE_LOG=0
     local MAX_LIST=15
+    local -a config_missing
 
     local LOG_DIR="$LICHTAR_HOME/cache"
     local LOG_FILE="$LOG_DIR/update.log"
@@ -336,6 +337,21 @@ EOF
     fi
 
     # =========================================================================
+    # Configuration drift
+    # =========================================================================
+    if [[ -f "$LICHTAR_HOME/.env" && -f "$LICHTAR_HOME/.env.example" ]]; then
+        local -a config_known config_user
+        config_known=(${(f)"$(_lichtar_config_vars "$LICHTAR_HOME/.env.example")"})
+        config_user=(${(f)"$(_lichtar_config_vars "$LICHTAR_HOME/.env")"})
+
+        local config_var
+        for config_var in "${config_known[@]}"; do
+            [[ -z "${config_user[(r)$config_var]}" ]] &&
+                config_missing+=("$config_var")
+        done
+    fi
+
+    # =========================================================================
     # Footer
     # =========================================================================
     local elapsed=$SECONDS
@@ -352,6 +368,19 @@ EOF
         fi
     else
         ok "All lichtar components up to date"
+    fi
+
+    if (( ${#config_missing[@]} > 0 )); then
+        local config_count=${#config_missing[@]}
+        printf "  ${WRN}${B}⚠${NC}  ${TXT}${B}%d configuration option%s missing from .env${NC}\n" \
+            "$config_count" "$([[ $config_count -eq 1 ]] && printf "" || printf "s")"
+
+        local config_line
+        for config_var in "${config_missing[@]}"; do
+            config_line=$(_lichtar_config_line "$config_var" "$LICHTAR_HOME/.env.example")
+            detail "$config_line"
+        done
+        detail "Add these options to ~/.lichtar/.env if you want to use them."
     fi
 
     printf "  ${KEY}${B}✨ Done${NC}  ${TXM}· %ss${NC}\n\n" "$elapsed"

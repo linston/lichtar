@@ -95,6 +95,11 @@ Edit `~/.lichtar/.env` — it's your personal config, gitignored, and never
 overwritten by `install.sh` or `lichtar update`. See `lichtar help config`
 for all available flags.
 
+If `.env.example` gains new options, `lichtar update` and `lichtar doctor`
+will show which options are missing from your `.env`. `lichtar doctor`
+also reports options that are no longer recognized. Your `.env` is never
+modified automatically.
+
 ## Updating
 
 ```sh

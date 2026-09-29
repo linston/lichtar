@@ -376,18 +376,33 @@ EOF
         ok ".env present"
 
         if [[ -f "$LICHTAR_HOME/.env.example" ]]; then
-            local -a known_vars user_vars unknown_vars
-            known_vars=(${(f)"$(grep -oE '^LICHTAR_[A-Z_]+' "$LICHTAR_HOME/.env.example")"})
-            user_vars=(${(f)"$(grep -oE '^LICHTAR_[A-Z_]+' "$LICHTAR_HOME/.env")"})
+            local -a known_vars user_vars unknown_vars missing_vars
+            known_vars=(${(f)"$(_lichtar_config_vars "$LICHTAR_HOME/.env.example")"})
+            user_vars=(${(f)"$(_lichtar_config_vars "$LICHTAR_HOME/.env")"})
+
             local v
             for v in "${user_vars[@]}"; do
                 [[ -z "${known_vars[(r)$v]}" ]] && unknown_vars+=("$v")
             done
+            for v in "${known_vars[@]}"; do
+                [[ -z "${user_vars[(r)$v]}" ]] && missing_vars+=("$v")
+            done
+
             if (( ${#unknown_vars[@]} > 0 )); then
                 warn "${#unknown_vars[@]} unrecognized variable(s) in .env"
                 local uv
                 for uv in "${unknown_vars[@]}"; do
                     detail "$uv — not in .env.example, possibly renamed or removed"
+                done
+                (( ISSUES++ ))
+            fi
+
+            if (( ${#missing_vars[@]} > 0 )); then
+                warn "${#missing_vars[@]} configuration option(s) missing from .env"
+                local mv config_line
+                for mv in "${missing_vars[@]}"; do
+                    config_line=$(_lichtar_config_line "$mv" "$LICHTAR_HOME/.env.example")
+                    detail "$config_line"
                 done
                 (( ISSUES++ ))
             fi
