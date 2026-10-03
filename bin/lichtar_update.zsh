@@ -127,13 +127,24 @@ EOF
     }
 
     local _cleanup() {
+        # Remove traps before unfunctioning helpers so EXIT cannot invoke
+        # _cleanup again after it has been removed.
+        trap - EXIT INT TERM
         spinner_stop
         # has/section/ok/skip/warn/detail/_hex2a are shared — see
         # bin/_cli_common.zsh. Only update-specific leaks listed here.
         _lichtar_cli_cleanup log_line print_limited_list \
-            spinner_start spinner_stop run _cleanup
+            spinner_start spinner_stop run _cleanup _interrupt_int _interrupt_term
     }
-    trap _cleanup EXIT INT TERM
+    local _interrupt_int() {
+        exit 130
+    }
+    local _interrupt_term() {
+        exit 143
+    }
+    trap _cleanup EXIT
+    trap _interrupt_int INT
+    trap _interrupt_term TERM
 
     # ── Runner ───────────────────────────────────────────────────────────────
     local RUN_OUT="" RUN_RC=0
