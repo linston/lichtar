@@ -9,10 +9,6 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
-### Fixed
-- Fixed the shell builtin `stat` shadowing the external `stat` command.
-- Fixed self-update rollback from discarding unrelated local changes.
-
 ### Added
 
 - `lichtar update` and `lichtar doctor` now detect configuration options missing from `.env`; `doctor` also reports unrecognized options.
@@ -21,6 +17,8 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- Fixed the shell builtin `stat` shadowing the external `stat` command.
+- Fixed self-update rollback from discarding unrelated local changes.
 - Fixed prompt command injection from shell syntax embedded in user-controlled path and Git branch data.
 - `install.sh` now uses explicit package-state initialization and package-resolution status handling.
 - `install.sh` now checks the actual login shell before offering to change it, avoiding unnecessary `chsh` prompts when `$SHELL` is unset or stale.
