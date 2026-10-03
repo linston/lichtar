@@ -219,9 +219,14 @@ EOF
 
                 if (( _syntax_bad )); then
                     warn "New version failed a syntax check — rolling back to ${before}"
-                    git -C "$LICHTAR_HOME" reset --hard "$before" >/dev/null 2>&1
-                    detail "Reverted — your shell is safe. Try again later or report upstream."
-                    FAILED+=("lichtar (self) — broken update, rolled back")
+                    if git -C "$LICHTAR_HOME" reset --keep "$before" >/dev/null 2>&1; then
+                        detail "Reverted — your shell is safe. Try again later or report upstream."
+                        FAILED+=("lichtar (self) — broken update, rolled back")
+                    else
+                        warn "Could not safely roll back to ${before}; your local changes were preserved."
+                        detail "The broken update remains checked out. Restore ${before} manually or resolve the local changes before retrying."
+                        FAILED+=("lichtar (self) — broken update, rollback blocked")
+                    fi
                 else
                     source "$LICHTAR_HOME/bin/system_detect.zsh"
                     detect_system

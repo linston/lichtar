@@ -11,6 +11,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 - Fixed the shell builtin `stat` shadowing the external `stat` command.
+- Fixed self-update rollback from discarding unrelated local changes.
 
 ### Added
 
