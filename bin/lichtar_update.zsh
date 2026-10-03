@@ -206,46 +206,50 @@ EOF
 
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
-            after=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
-            if [[ "$before" == "$after" ]]; then
-                skip "Already up to date"
+            if (( DRYRUN == 1 )); then
+                skip "Dry-run only"
             else
-                ok "Updated: ${before} → ${after}"
-
-                # Verify the new code actually loads before committing to
-                # it — a broken commit here would leave every future shell
-                # start unable to open at all, with no easy way back in.
-                local _syntax_bad=0 _f
-                for _f in $(find "$LICHTAR_HOME" -name '*.zsh' -not -path "*/plugins/*/*"); do
-                    zsh -n "$_f" 2>/dev/null || _syntax_bad=1
-                done
-
-                # Static checks above only see *.zsh files, so bin/lichtar
-                # itself (no extension) is never covered. Actually running
-                # it closes that gap and also catches runtime errors a
-                # syntax check can't (missing function, bad call) — same
-                # idea as CI's install-smoke-test job. `system` specifically
-                # because it's non-interactive and makes no network calls.
-                if (( _syntax_bad == 0 )); then
-                    "$LICHTAR_HOME/bin/lichtar" system --no-color >/dev/null 2>&1 || _syntax_bad=1
-                fi
-
-                if (( _syntax_bad )); then
-                    warn "New version failed a syntax check — rolling back to ${before}"
-                    if git -C "$LICHTAR_HOME" reset --keep "$before" >/dev/null 2>&1; then
-                        detail "Reverted — your shell is safe. Try again later or report upstream."
-                        FAILED+=("lichtar (self) — broken update, rolled back")
-                    else
-                        warn "Could not safely roll back to ${before}; your local changes were preserved."
-                        detail "The broken update remains checked out. Restore ${before} manually or resolve the local changes before retrying."
-                        FAILED+=("lichtar (self) — broken update, rollback blocked")
-                    fi
+                after=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
+                if [[ "$before" == "$after" ]]; then
+                    skip "Already up to date"
                 else
-                    source "$LICHTAR_HOME/bin/system_detect.zsh"
-                    detect_system
-                    detail "System detection cache refreshed"
+                    ok "Updated: ${before} → ${after}"
+
+                    # Verify the new code actually loads before committing to
+                    # it — a broken commit here would leave every future shell
+                    # start unable to open at all, with no easy way back in.
+                    local _syntax_bad=0 _f
+                    for _f in $(find "$LICHTAR_HOME" -name '*.zsh' -not -path "*/plugins/*/*"); do
+                        zsh -n "$_f" 2>/dev/null || _syntax_bad=1
+                    done
+
+                    # Static checks above only see *.zsh files, so bin/lichtar
+                    # itself (no extension) is never covered. Actually running
+                    # it closes that gap and also catches runtime errors a
+                    # syntax check can't (missing function, bad call) — same
+                    # idea as CI's install-smoke-test job. `system` specifically
+                    # because it's non-interactive and makes no network calls.
+                    if (( _syntax_bad == 0 )); then
+                        "$LICHTAR_HOME/bin/lichtar" system --no-color >/dev/null 2>&1 || _syntax_bad=1
+                    fi
+
+                    if (( _syntax_bad )); then
+                        warn "New version failed a syntax check — rolling back to ${before}"
+                        if git -C "$LICHTAR_HOME" reset --keep "$before" >/dev/null 2>&1; then
+                            detail "Reverted — your shell is safe. Try again later or report upstream."
+                            FAILED+=("lichtar (self) — broken update, rolled back")
+                        else
+                            warn "Could not safely roll back to ${before}; your local changes were preserved."
+                            detail "The broken update remains checked out. Restore ${before} manually or resolve the local changes before retrying."
+                            FAILED+=("lichtar (self) — broken update, rollback blocked")
+                        fi
+                    else
+                        source "$LICHTAR_HOME/bin/system_detect.zsh"
+                        detect_system
+                        detail "System detection cache refreshed"
+                    fi
+                    unset _syntax_bad _f
                 fi
-                unset _syntax_bad _f
             fi
         else
             warn "lichtar self-update failed (local changes or diverged history?)"
@@ -310,15 +314,19 @@ EOF
 
     if has ya; then
         if run "Upgrading yazi plugins…" ya pkg upgrade; then
-            # Text-matching `ya`'s own output, since it has no machine-readable
-            # mode for this. Known fragility: if a future yazi version changes
-            # this wording, this silently falls through to "Nothing to update"
-            # rather than erroring — not fixable without a `ya pkg upgrade`
-            # output-format guarantee that doesn't currently exist.
-            if echo "$RUN_OUT" | grep -qi "Deploying\|Upgraded\|up-to-date\|up to date"; then
-                ok "Yazi plugins updated"
+            if (( DRYRUN == 1 )); then
+                skip "Dry-run only"
             else
-                skip "Nothing to update"
+                # Text-matching `ya`'s own output, since it has no machine-readable
+                # mode for this. Known fragility: if a future yazi version changes
+                # this wording, this silently falls through to "Nothing to update"
+                # rather than erroring — not fixable without a `ya pkg upgrade`
+                # output-format guarantee that doesn't currently exist.
+                if echo "$RUN_OUT" | grep -qi "Deploying\|Upgraded\|up-to-date\|up to date"; then
+                    ok "Yazi plugins updated"
+                else
+                    skip "Nothing to update"
+                fi
             fi
         else
             warn "Yazi plugin upgrade failed"
@@ -375,7 +383,9 @@ EOF
     local elapsed=$SECONDS
     printf "\n  ${ACC}${B}─────────────────────────────────────${NC}\n"
 
-    if (( ${#FAILED[@]} > 0 )); then
+    if (( DRYRUN == 1 )); then
+        ok "Dry-run complete — no changes were made"
+    elif (( ${#FAILED[@]} > 0 )); then
         warn "Completed with errors:"
         local fl
         for fl in "${FAILED[@]}"; do detail "$fl"; done
