@@ -357,7 +357,8 @@ EOF
     if [[ -d "$cache_dir" ]]; then
         local zcd="$cache_dir/zcompdump"
         if [[ -f "$zcd" ]]; then
-            zmodload zsh/datetime zsh/stat 2>/dev/null
+            zmodload zsh/datetime 2>/dev/null
+            zmodload -F zsh/stat b:zstat 2>/dev/null
             local age_h=$(( ( EPOCHSECONDS - $(zstat +mtime "$zcd" 2>/dev/null || echo 0) ) / 3600 ))  
             ok "zcompdump  (age: ${age_h}h)"
         else

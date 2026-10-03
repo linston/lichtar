@@ -34,7 +34,7 @@ _lichtar_load_fsh() {
     if [[ -n "$CL_FSH_THEME_INI" && -f "$CL_FSH_THEME_INI" ]]; then
         local _fsh_hash_file="$LICHTAR_HOME/cache/fsh_theme.md5"
         local _fsh_plugin_dir="$LICHTAR_HOME/plugins/fast-syntax-highlighting"
-        zmodload zsh/stat 2>/dev/null
+        zmodload -F zsh/stat b:zstat 2>/dev/null
         local _fsh_theme_mtime _fsh_theme_size _fsh_plugin_mtime
         _fsh_theme_mtime=$(zstat +mtime "$CL_FSH_THEME_INI" 2>/dev/null)
         _fsh_theme_size=$(zstat +size "$CL_FSH_THEME_INI" 2>/dev/null)

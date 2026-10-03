@@ -9,6 +9,9 @@ this file records _what_ changed, tags record _which commit_.
 
 ## [Unreleased]
 
+### Fixed
+- Fixed the shell builtin `stat` shadowing the external `stat` command.
+
 ### Added
 
 - `lichtar update` and `lichtar doctor` now detect configuration options missing from `.env`; `doctor` also reports unrecognized options.

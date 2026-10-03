@@ -18,7 +18,7 @@ autoload -Uz compinit
 # Fast mode (-C) only when cache exists and is newer than 20 hours
 local zcd="$LICHTAR_HOME/cache/zcompdump"
 if [[ -f "$zcd" ]]; then
-    zmodload zsh/stat 2>/dev/null
+    zmodload -F zsh/stat b:zstat 2>/dev/null
     local zcd_age=$(( EPOCHSECONDS - $(zstat +mtime "$zcd" 2>/dev/null || echo 0) ))
     if (( zcd_age < 72000 )); then   # 20h = 72000s
         compinit -C -d "$zcd"
