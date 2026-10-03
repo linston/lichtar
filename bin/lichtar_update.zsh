@@ -108,7 +108,7 @@ EOF
         [[ ! -t 1 ]] && return 0
         local msg="$1"
         ( local i=1
-          while true; do
+          while kill -0 $$ 2>/dev/null; do
               printf "\r  ${ACC}%s${NC}  ${TXM}%s${NC}" "${_FRAMES[$i]}" "$msg"
               (( i = i % ${#_FRAMES[@]} + 1 ))
               sleep 0.08
@@ -137,9 +137,11 @@ EOF
             spinner_start spinner_stop run _cleanup _interrupt_int _interrupt_term
     }
     local _interrupt_int() {
+        spinner_stop
         exit 130
     }
     local _interrupt_term() {
+        spinner_stop
         exit 143
     }
     trap _cleanup EXIT
