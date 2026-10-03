@@ -8,7 +8,10 @@ setopt extendedglob
 setopt AUTO_CD
 setopt AUTO_PUSHD
 setopt PUSHD_IGNORE_DUPS
-setopt PROMPT_SUBST
+# Prompt strings contain user-controlled data (paths, git branch names).
+# Keep prompt substitution disabled so shell syntax in those values is
+# displayed literally rather than executed.
+unsetopt PROMPT_SUBST
 setopt INTERACTIVE_COMMENTS
 
 # ── History ───────────────────────────────────────────────────────────────────

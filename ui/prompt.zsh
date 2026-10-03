@@ -76,7 +76,7 @@ function _assemble_prompt() {
     local arrow=" %(?.%B%F{$CL_SCS}.%B%F{$CL_FLR})❯%b%f"
 
     local left="%F{$CL_LNL}└─%f${err}${jobs}${arrow} "
-    local right='${_cmd_duration}%F{$CL_TIM} %D{%H:%M}%f'
+    local right="${_cmd_duration}%F{$CL_TIM} %D{%H:%M}%f"
 
     PROMPT=$'\n'"${badge}${_rendered_path}${vcs_info_msg_0_}${_git_ahead_behind}${_l_cache_val}"$'\n'"${left}"
     RPROMPT="${right}"

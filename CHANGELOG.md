@@ -17,6 +17,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- Fixed prompt command injection from shell syntax embedded in user-controlled path and Git branch data.
 - `install.sh` now uses explicit package-state initialization and package-resolution status handling.
 - `install.sh` now checks the actual login shell before offering to change it, avoiding unnecessary `chsh` prompts when `$SHELL` is unset or stale.
 
