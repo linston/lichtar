@@ -145,18 +145,20 @@ detect_pkg_manager() {
 resolve_pkg_name() {
   # $1 = generic package name -> prints the resolved package name for $PM
   generic="$1"
-  while IFS= read -r entry; do
-    case "$entry" in '' | '#'*) continue ;; esac
-    ov_generic=${entry%%:*}
-    rest=${entry#*:}
-    ov_pm=${rest%%:*}
-    rest=${rest#*:}
-    ov_name=${rest%%:*}
-    if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
-      echo "$ov_name"
-      return 0
-    fi
-  done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+  if [ -r "$LICHTAR_HOME/bin/data/pkg-overrides.txt" ]; then
+    while IFS= read -r entry; do
+      case "$entry" in '' | '#'*) continue ;; esac
+      ov_generic=${entry%%:*}
+      rest=${entry#*:}
+      ov_pm=${rest%%:*}
+      rest=${rest#*:}
+      ov_name=${rest%%:*}
+      if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
+        echo "$ov_name"
+        return 0
+      fi
+    done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+  fi
   echo "$generic"
 }
 
@@ -164,18 +166,20 @@ resolve_pkg_bin() {
   # $1 = generic package name -> prints the resolved binary name for $PM,
   # or nothing if there's no override for it (caller keeps its own default)
   generic="$1"
-  while IFS= read -r entry; do
-    case "$entry" in '' | '#'*) continue ;; esac
-    ov_generic=${entry%%:*}
-    rest=${entry#*:}
-    ov_pm=${rest%%:*}
-    rest=${rest#*:}
-    ov_bin=${rest#*:}
-    if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
-      echo "$ov_bin"
-      return 0
-    fi
-  done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+  if [ -r "$LICHTAR_HOME/bin/data/pkg-overrides.txt" ]; then
+    while IFS= read -r entry; do
+      case "$entry" in '' | '#'*) continue ;; esac
+      ov_generic=${entry%%:*}
+      rest=${entry#*:}
+      ov_pm=${rest%%:*}
+      rest=${rest#*:}
+      ov_bin=${rest#*:}
+      if [ "$ov_generic" = "$generic" ] && [ "$ov_pm" = "$PM" ]; then
+        echo "$ov_bin"
+        return 0
+      fi
+    done <"$LICHTAR_HOME/bin/data/pkg-overrides.txt"
+  fi
 }
 
 pm_install_cmd() {
