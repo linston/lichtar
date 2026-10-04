@@ -24,6 +24,7 @@ this file records _what_ changed, tags record _which commit_.
 - `Ctrl-C` during `lichtar update` now terminates the update cleanly without leaving a background spinner behind.
 - `lichtar update --dry-run` now reports simulated actions without falsely claiming that components are up to date.
 - `lichtar update` now validates non-vendored `.sh` files during self-update and safely handles paths containing spaces.
+- `lichtar doctor` now checks the minimum Yazi version required by bundled plugins.
 - `install.sh` now uses explicit package-state initialization and package-resolution status handling.
 - `install.sh` now checks the actual login shell before offering to change it, avoiding unnecessary `chsh` prompts when `$SHELL` is unset or stale.
 

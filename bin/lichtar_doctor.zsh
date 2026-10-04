@@ -252,6 +252,7 @@ EOF
     has fzf    && check_min_version "fzf"    "0.40" "$(fzf --version 2>/dev/null)"
     has zoxide && check_min_version "zoxide" "0.9"  "$(zoxide --version 2>/dev/null)"
     has eza    && check_min_version "eza"    "0.15" "$(eza --version 2>/dev/null)"
+    has yazi   && check_min_version "yazi"   "26.8.15" "$(ya --version 2>/dev/null)"
 
     # =========================================================================
     # 3. Nerd Font
