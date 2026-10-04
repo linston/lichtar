@@ -711,7 +711,8 @@ _lichtar_help_render() {
         _SS "Install"
         _X "git clone https://github.com/linston/lichtar ~/.lichtar"
         _X "~/.lichtar/bin/install.sh"
-        _N "Add -y to skip prompts (the .zshrc overwrite prompt is never skipped)."
+        _N "Add -y to skip prompts (the .zshrc overwrite prompt is never skipped;"
+        _N "installation stops if required tools are missing)."
         _N "Cloning straight into ~/.lichtar is what makes it a real git checkout —"
         _N "that's required for 'lichtar update' to update lichtar itself, too."
         _BR

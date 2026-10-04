@@ -78,7 +78,8 @@ missing (plugins, `.env`, `.zshrc`, font, default shell). Nothing already
 in place is overwritten without asking first.
 
 Add `-y` to skip prompts (the `.zshrc` overwrite prompt is never
-skipped, even with `-y`):
+skipped, even with `-y`; installation also stops if required tools
+are missing):
 
 ```sh
 ~/.lichtar/bin/install.sh -y

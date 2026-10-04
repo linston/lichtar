@@ -288,6 +288,10 @@ if [ -n "$missing_required" ] || [ -n "$missing_optional" ]; then
 fi
 
 if [ -n "$missing_required" ]; then
+  if [ "$YES" -eq 1 ]; then
+    warn "Required tools are still missing — aborting"
+    exit 1
+  fi
   if ! confirm "Some required tools are still missing — continue anyway?"; then
     exit 1
   fi

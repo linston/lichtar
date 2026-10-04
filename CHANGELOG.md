@@ -28,6 +28,7 @@ this file records _what_ changed, tags record _which commit_.
 - `lichtar doctor` now checks the minimum Yazi version required by bundled plugins.
 - `lichtar doctor` now correctly ignores commented or unrelated `LICHTAR_HOME` references when checking whether `.zshrc` sources lichtar.
 - `install.sh` now falls back to generic package names when `pkg-overrides.txt` is unavailable.
+- `install.sh -y` now aborts when required tools are missing instead of continuing to report a successful installation.
 - Yazi now updates the zoxide database when browsing directories.
 - `install.sh` now uses explicit package-state initialization and package-resolution status handling.
 - `install.sh` now checks the actual login shell before offering to change it, avoiding unnecessary `chsh` prompts when `$SHELL` is unset or stale.
