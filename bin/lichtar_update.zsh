@@ -219,16 +219,15 @@ EOF
                     # it — a broken commit here would leave every future shell
                     # start unable to open at all, with no easy way back in.
                     local _syntax_bad=0 _f
-                    for _f in $(find "$LICHTAR_HOME" -name '*.zsh' -not -path "*/plugins/*/*"); do
+                    while IFS= read -r -d '' _f; do
                         zsh -n "$_f" 2>/dev/null || _syntax_bad=1
-                    done
+                    done < <(find "$LICHTAR_HOME" \( -name '*.zsh' -o -name '*.sh' \) \
+                        -not -path "*/plugins/*/*" -print0)
 
-                    # Static checks above only see *.zsh files, so bin/lichtar
-                    # itself (no extension) is never covered. Actually running
-                    # it closes that gap and also catches runtime errors a
-                    # syntax check can't (missing function, bad call) — same
-                    # idea as CI's install-smoke-test job. `system` specifically
-                    # because it's non-interactive and makes no network calls.
+                    # Static checks cover all non-vendored shell source files.
+                    # Running bin/lichtar itself (no extension) adds a runtime check for
+                    # errors that syntax validation cannot catch (missing function, bad call).
+                    # `system` is used because it is non-interactive and makes no network calls.
                     if (( _syntax_bad == 0 )); then
                         "$LICHTAR_HOME/bin/lichtar" system --no-color >/dev/null 2>&1 || _syntax_bad=1
                     fi
