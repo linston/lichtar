@@ -7,7 +7,6 @@
 [[ -o interactive ]] || return 0
 
 fpath=(
-    "$LICHTAR_HOME/plugins/zsh-completions/src"
     ${PREFIX:+"$PREFIX/share/zsh/site-functions"}
     ${PREFIX:+"$PREFIX/share/zsh/vendor-completions"}
     $fpath

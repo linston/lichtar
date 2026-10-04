@@ -59,6 +59,7 @@ if [[ -f "$theme_file" ]]; then
 else
     echo "[lichtar] theme not found: $LICHTAR_THEME"
 fi
+unset theme_file
 
 # ── Core ──────────────────────────────────────────────────────────────────────
 _lichtar_load "$LICHTAR_HOME/core/path.zsh"
