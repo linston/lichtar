@@ -2,6 +2,7 @@
 
 detect_system() {
     local platform distro pm icon color family
+    local ID NAME VERSION_ID PRETTY_NAME VERSION ID_LIKE
 
     if [[ -n "$TERMUX_VERSION" ]]; then
         platform="android"

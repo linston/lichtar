@@ -18,6 +18,7 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- `system_detect` no longer leaks `/etc/os-release` variables into the interactive shell scope.
 - Fixed the shell builtin `stat` shadowing the external `stat` command.
 - Fixed self-update rollback from discarding unrelated local changes.
 - Fixed prompt command injection from shell syntax embedded in user-controlled path and Git branch data.
