@@ -71,15 +71,15 @@ EOF
     local B NC HDR ACC WRN KEY TXT TXM LHT ZSHC YZI
     if (( NO_COLOR == 0 )); then
         B=$'\e[1m'; NC=$'\e[0m'
-        HDR="$(_hex2a "${CL_MTN_HDR}")"   # header
-        ACC="$(_hex2a "${CL_MTN_ACC}")"   # accents
-        WRN="$(_hex2a "${CL_MTN_WRN}")"   # warnings
-        KEY="$(_hex2a "${CL_MTN_KEY}")"   # key / commands
-        TXT="$(_hex2a "${CL_MTN_TXT}")"   # text
-        TXM="$(_hex2a "${CL_MTN_TXM}")"   # text muted
-        LHT="$(_hex2a "${CL_MTN_LHT}")"   # lichtar
+        HDR="$(_hex2a "${CL_MTN_HDR:-#80a08a}")"   # header
+        ACC="$(_hex2a "${CL_MTN_ACC:-#94e2d5}")"   # accents
+        WRN="$(_hex2a "${CL_MTN_WRN:-#f38ba8}")"   # warnings
+        KEY="$(_hex2a "${CL_MTN_KEY:-#a6e3bf}")"   # key / commands
+        TXT="$(_hex2a "${CL_MTN_TXT:-#cdd6f4}")"   # text
+        TXM="$(_hex2a "${CL_MTN_TXM:-#6c7086}")"   # text muted
+        LHT="$(_hex2a "${CL_MTN_LHT:-#89dceb}")"   # lichtar
         ZSHC="$(_hex2a "${CL_MTN_ZSH:-#fab387}")"  # zsh plugins
-        YZI="$(_hex2a "${CL_MTN_YZI}")"   # yazi plugins
+        YZI="$(_hex2a "${CL_MTN_YZI:-#89b4fa}")"   # yazi plugins
     else
         B="" NC="" HDR="" ACC="" WRN="" KEY="" TXT="" TXM="" LHT="" ZSHC="" YZI=""
     fi
