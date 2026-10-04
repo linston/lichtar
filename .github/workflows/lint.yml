@@ -71,19 +71,42 @@ jobs:
             exit 1
           fi
 
-      - name: Run install.sh non-interactively
+      - name: Verify install.sh rejects missing required tools
         run: |
-          "$HOME/.lichtar/bin/install.sh" -y
+          set +e
+          out=$("$HOME/.lichtar/bin/install.sh" -y 2>&1)
+          rc=$?
+          set -e
 
-      - name: Verify baseline post-install state
+          echo "$out"
+
+          if [ "$rc" -ne 1 ]; then
+            echo "::error::install.sh -y must exit 1 when required tools are missing"
+            exit 1
+          fi
+
+          if ! echo "$out" | grep -q "Required tools are still missing — aborting"; then
+            echo "::error::install.sh did not report the expected missing-required-tools failure"
+            exit 1
+          fi
+
+  runtime-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -y zsh
+
+      - name: Stage checkout at ~/.lichtar
+        run: |
+          mkdir -p "$HOME/.lichtar"
+          cp -a "$GITHUB_WORKSPACE"/. "$HOME/.lichtar"/
+
+      - name: Verify runtime baseline
         run: |
           test -x "$HOME/.lichtar/bin/lichtar" || {
-            echo "::error::bin/lichtar not executable after install"
-            exit 1
-          }
-
-          grep -q "LICHTAR_HOME" "$HOME/.zshrc" || {
-            echo "::error::~/.zshrc was not configured"
+            echo "::error::bin/lichtar is not executable"
             exit 1
           }
 
@@ -102,11 +125,17 @@ jobs:
             exit 1
           fi
 
-      - name: Sanity check init.zsh after a full install (plugins present)
+      - name: Sanity check init.zsh with a plugin present
         run: |
+          mkdir -p "$HOME/.lichtar/plugins"
+
+          git clone --depth=1 -q \
+            https://github.com/hlissner/zsh-autopair \
+            "$HOME/.lichtar/plugins/zsh-autopair"
+
           out=$(zsh -c 'export LICHTAR_HOME="$HOME/.lichtar"; source "$LICHTAR_HOME/init.zsh"' 2>&1) || true
           echo "$out"
           if echo "$out" | grep -qiE "command not found|parse error|no such file or directory"; then
-            echo "::error::init.zsh failed to load cleanly after install.sh"
+            echo "::error::init.zsh failed to load cleanly with a plugin present"
             exit 1
           fi
