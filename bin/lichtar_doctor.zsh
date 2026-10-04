@@ -209,7 +209,7 @@ EOF
         ok "p7zip"
     else
         warn "p7zip — not found"
-        detail "$(pkg_install_hint "p7zip")"
+        detail "$(pkg_install_hint "${PKG_NAME_PM[p7zip]:-p7zip}")"
         (( ISSUES++ ))
     fi
 

@@ -35,6 +35,7 @@ this file records _what_ changed, tags record _which commit_.
 - `Ctrl+F` and `Alt+C` now enter the selected directory immediately after choosing it with fzf.
 - `install.sh` now reports plugin installation failures correctly and exits with a non-zero status.
 - `install.sh` no longer mistakes comments mentioning `LICHTAR_HOME` for an existing Lichtar loader in `~/.zshrc`.
+- `lichtar doctor` now uses the package-manager-specific name for `p7zip` in installation hints.
 
 ### Performance
 
