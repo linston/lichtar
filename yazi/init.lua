@@ -28,3 +28,7 @@ end, 3300, Status.LEFT)
 
 -- ~/.config/yazi/init.lua
 --require("autosession"):setup()
+
+require("zoxide"):setup {
+        update_db = true,
+}
