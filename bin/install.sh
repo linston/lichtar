@@ -278,13 +278,35 @@ fi
 
 if [ -n "$missing_required" ] || [ -n "$missing_optional" ]; then
   resolved=""
+  unavailable=""
+
   for p in $missing_required $missing_optional; do
-    resolved="$resolved $(resolve_pkg_name "$p")"
+    pkg=$(resolve_pkg_name "$p")
+
+    if [ "$PM" = "apt" ]; then
+      if apt-cache show "$pkg" >/dev/null 2>&1; then
+        resolved="$resolved $pkg"
+      else
+        unavailable="$unavailable $pkg"
+      fi
+    else
+      resolved="$resolved $pkg"
+    fi
   done
+
   printf "\n"
-  info "lichtar doesn't install packages itself — install these your own way, e.g.:"
-  # shellcheck disable=SC2086  # intentional: word-split into multiple args for "$@" below
-  printf "\n    %s\n\n" "$(pm_install_cmd $resolved)"
+
+  if [ -n "$resolved" ]; then
+    info "lichtar doesn't install packages itself — install these your own way, e.g.:"
+    # shellcheck disable=SC2086  # intentional: word-split into multiple args for "$@" below
+    printf "\n    %s\n\n" "$(pm_install_cmd $resolved)"
+  fi
+
+  if [ -n "$unavailable" ]; then
+    warn "Not found in the configured apt package lists:$unavailable"
+    info "Refresh the apt package lists and rerun install.sh."
+    info "If these packages remain unavailable, install them from a suitable source."
+  fi
 fi
 
 if [ -n "$missing_required" ]; then
