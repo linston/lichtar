@@ -31,9 +31,30 @@ setopt HIST_IGNORE_SPACE
 # separate, append-only, non-deduplicated log just for ranking.
 LICHTAR_FREQ_FILE="$LICHTAR_HOME/cache/history_freq"
 if [[ ! -f "$LICHTAR_FREQ_FILE" && -f "$HISTFILE" ]]; then
-    # One-time seed from the existing HISTFILE so CTRL+R isn't empty right
-    # after the update. Every command starts at frequency 1.
-    sed -E 's/^: [0-9]+:[0-9]+;//' "$HISTFILE" > "$LICHTAR_FREQ_FILE" 2>/dev/null
+    # Decode Zsh's metafied history through Zsh itself; copying bytes with
+    # sed can corrupt non-ASCII commands in the frequency log.
+    _lichtar_freq_seed_tmp="${LICHTAR_FREQ_FILE}.tmp.$$"
+    if zsh -f -s -- "$HISTFILE" > "$_lichtar_freq_seed_tmp" 2>/dev/null <<'LICHTAR_HISTORY_SEED'
+HISTFILE=$1
+HISTSIZE=50000
+SAVEHIST=50000
+fc -p "$HISTFILE" "$HISTSIZE" "$SAVEHIST" || exit 1
+for event in ${(onk)history}; do
+    cmd="${history[$event]}"
+    cmd="${cmd//$'\n'/ ; }"
+    print -r -- "$cmd"
+done
+LICHTAR_HISTORY_SEED
+    then
+        if [[ -s "$_lichtar_freq_seed_tmp" ]] && mv -- "$_lichtar_freq_seed_tmp" "$LICHTAR_FREQ_FILE"; then
+            :
+        else
+            rm -f -- "$_lichtar_freq_seed_tmp"
+        fi
+    else
+        rm -f -- "$_lichtar_freq_seed_tmp"
+    fi
+    unset _lichtar_freq_seed_tmp
 fi
 
 # ── Word characters (physical keyboard) ───────────────────────────────────────

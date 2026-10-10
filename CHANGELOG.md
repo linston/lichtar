@@ -18,6 +18,8 @@ this file records _what_ changed, tags record _which commit_.
 
 ### Fixed
 
+- Fixed UTF-8 corruption when seeding the history-frequency log from Zsh history.
+
 - `system_detect` no longer leaks `/etc/os-release` variables into the interactive shell scope.
 - Fixed the shell builtin `stat` shadowing the external `stat` command.
 - Fixed self-update rollback from discarding unrelated local changes.
