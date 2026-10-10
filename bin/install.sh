@@ -363,7 +363,8 @@ LOADER="export LICHTAR_HOME=\"\$HOME/.lichtar\"
     source \"\$LICHTAR_HOME/init.zsh\"
 "
 
-if [ -f "$HOME/.zshrc" ] && grep -q "source \"\$LICHTAR_HOME/init.zsh\"" "$HOME/.zshrc" 2>/dev/null; then
+# shellcheck disable=SC2016
+if [ -f "$HOME/.zshrc" ] && grep -Eq '^[[:space:]]*(source[[:space:]]+"\$LICHTAR_HOME/init\.zsh"|[^#]*&&[[:space:]]+source[[:space:]]+"\$LICHTAR_HOME/init\.zsh")' "$HOME/.zshrc" 2>/dev/null; then
   info "$HOME/.zshrc already references lichtar — leaving it as-is"
 elif [ -f "$HOME/.zshrc" ]; then
   backup="$HOME/.zshrc.lichtar-backup-$(date +%Y%m%d%H%M%S)"

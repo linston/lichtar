@@ -416,7 +416,7 @@ EOF
     fi
 
     if [[ -f "$HOME/.zshrc" ]]; then
-        if grep -Eq '^[[:space:]]*(source|.*&&[[:space:]]+source)[[:space:]]+"\$LICHTAR_HOME/init\.zsh"' "$HOME/.zshrc" 2>/dev/null; then
+        if grep -Eq '^[[:space:]]*(source[[:space:]]+"\$LICHTAR_HOME/init\.zsh"|[^#]*&&[[:space:]]+source[[:space:]]+"\$LICHTAR_HOME/init\.zsh")' "$HOME/.zshrc" 2>/dev/null; then
             ok "~/.zshrc sources lichtar"
         else
             warn "~/.zshrc does not appear to source lichtar"
