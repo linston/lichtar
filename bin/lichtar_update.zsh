@@ -191,19 +191,6 @@ EOF
     if [[ -d "$LICHTAR_HOME/.git" ]]; then
         local before after
 
-        # Yazi's package manager modifies these tracked files at runtime.
-        # They are managed package state, not user configuration. Restore only
-        # these two files before self-update so runtime changes from `ya pkg
-        # upgrade` cannot block the next fast-forward update.
-        local -a YAZI_STATE_FILES=(
-            yazi/package.toml
-            yazi/flavors/catppuccin-mocha.yazi/flavor.toml
-        )
-
-        if (( DRYRUN == 0 )); then
-            git -C "$LICHTAR_HOME" restore -- "${YAZI_STATE_FILES[@]}" 2>/dev/null
-        fi
-
         before=$(git -C "$LICHTAR_HOME" rev-parse --short HEAD 2>/dev/null)
         if run "Pulling lichtar updates…" git -C "$LICHTAR_HOME" pull --ff-only; then
             if (( DRYRUN == 1 )); then

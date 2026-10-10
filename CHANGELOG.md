@@ -37,7 +37,7 @@ this file records _what_ changed, tags record _which commit_.
 
 - `install.sh` now compares canonical shell paths on Linux, avoiding false failures when `command -v` and the login-shell entry use different symlink paths.
 - `install.sh` now detects its own `.bashrc` zsh fallback reliably instead of matching unrelated `exec ... zsh` text.
-- `lichtar update` now restores the two Yazi-managed package state files before self-update, preventing runtime changes from `ya pkg upgrade` from blocking later fast-forward updates.
+- `lichtar update` now preserves local edits to Yazi package state during self-update; conflicting updates fail safely instead of discarding those edits.
 - `Ctrl+F` and `Alt+C` now enter the selected directory immediately after choosing it with fzf.
 - `install.sh` now reports plugin installation failures correctly and exits with a non-zero status.
 - `install.sh` no longer mistakes comments mentioning `LICHTAR_HOME` for an existing Lichtar loader in `~/.zshrc`.
